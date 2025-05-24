@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Name=Concordia
-Comment= __DSW__ P2P Cryptocurrency
-Comment[fr]= __DSW__, monnaie virtuelle cryptographique pair à pair
-Comment[tr]= __DSW__, eşten eşe kriptografik sanal para birimi
+Comment= CNCD P2P Cryptocurrency
+Comment[fr]= CNCD, monnaie virtuelle cryptographique pair à pair
+Comment[tr]= CNCD, eşten eşe kriptografik sanal para birimi
 Exec=concordia-qt %u
 Terminal=false
 Type=Application

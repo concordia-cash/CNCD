@@ -5,7 +5,7 @@
 #define MyAppPublisher "2022 DECENOMY Core Developers"
 #define MyAppURL "https://concordia.com"
 #define MyAppExeName "concordia-qt.exe"
-#define MyAppExtraData "https://explorer.decenomy.net/bootstraps/__DSW__/bootstrap.zip"
+#define MyAppExtraData "https://explorer.decenomy.net/bootstraps/CNCD/bootstrap.zip"
 #define MyAppVersion GetVersionNumbersString(".\package\" + MyAppExeName)
 
 #include 'C:\Program Files (x86)\Inno Download Plugin\idp.iss'

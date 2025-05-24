@@ -5,7 +5,7 @@ FROM decenomy/dsw-macos-x64-builder@sha256:ff118694a4892abc89384bae52362aee90484
 ARG CPU_CORES=1
 
 # ARG for specifying the coin parameters
-ARG TICKER=__DSW__
+ARG TICKER=CNCD
 ARG NAME=Concordia
 ARG BASE_NAME=concordia
 ARG TARGET=master

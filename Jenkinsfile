@@ -5,7 +5,7 @@ pipeline {
     environment {
         NAME = 'Concordia'
         BASE_NAME = 'concordia'
-        ZIP_NAME = '__DSW__'
+        ZIP_NAME = 'CNCD'
     }
 
     stages {

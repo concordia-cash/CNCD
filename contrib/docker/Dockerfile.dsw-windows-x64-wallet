@@ -5,7 +5,7 @@ FROM decenomy/dsw-windows-x64-builder@sha256:aea70b0aeb3605a83d2c7e2fac514dc5a27
 ARG CPU_CORES=1
 
 # ARG for specifying the coin parameters
-ARG TICKER=__DSW__
+ARG TICKER=CNCD
 ARG NAME=Concordia
 ARG BASE_NAME=concordia
 ARG TARGET=master

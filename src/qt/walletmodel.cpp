@@ -300,7 +300,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
 
     // Pre-check input data for validity
     Q_FOREACH (const SendCoinsRecipient& rcp, recipients) {
-        // User-entered __DSW__ address / amount:
+        // User-entered CNCD address / amount:
         if (!validateAddress(rcp.address)) {
             return InvalidAddress;
         }
@@ -718,11 +718,11 @@ bool WalletModel::updateAddressBookPurpose(const QString &addressStr, const std:
 bool WalletModel::getKeyId(const CTxDestination& address, CKeyID& keyID)
 {
     if (!IsValidDestination(address))
-        return error("Invalid __DSW__ address");
+        return error("Invalid CNCD address");
 
     const CKeyID* inKeyID = boost::get<CKeyID>(&address);
     if (!inKeyID)
-        return error("Unable to get KeyID from __DSW__ address");
+        return error("Unable to get KeyID from CNCD address");
 
     keyID = *inKeyID;
     return true;
