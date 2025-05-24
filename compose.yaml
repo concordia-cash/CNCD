@@ -13,7 +13,7 @@ services:
       - -c
       - |
         if [ ! -f /usr/local/bin/__decenomy__d ]; then
-          echo "__Decenomy__ binary not found, setting up environment..."
+          echo "Concordia binary not found, setting up environment..."
           apt-get update && \
           apt-get install -y wget curl unzip && \
           rm -rf /var/lib/apt/lists/* && \
@@ -28,6 +28,6 @@ services:
           rm latest_release_url && \
           mv __decenomy__* /usr/local/bin;
         else
-          echo "__Decenomy__ binary already installed, skipping setup."
+          echo "Concordia binary already installed, skipping setup."
         fi
         __decenomy__d

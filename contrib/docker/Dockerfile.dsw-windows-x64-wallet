@@ -6,7 +6,7 @@ ARG CPU_CORES=1
 
 # ARG for specifying the coin parameters
 ARG TICKER=__DSW__
-ARG NAME=__Decenomy__
+ARG NAME=Concordia
 ARG BASE_NAME=__decenomy__
 ARG TARGET=master
 ARG GITHUB_USER=decenomy

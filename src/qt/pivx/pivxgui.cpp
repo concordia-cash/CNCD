@@ -68,7 +68,7 @@ PIVXGUI::PIVXGUI(const NetworkStyle* networkStyle, QWidget* parent) :
 
     QString windowTitle = QString::fromStdString(GetArg("-windowtitle", ""));
     if (windowTitle.isEmpty()) {
-        windowTitle = tr("__Decenomy__") + " - ";
+        windowTitle = tr("Concordia") + " - ";
         windowTitle += ((enableWallet) ? tr("Wallet") : tr("Node"));
     }
     windowTitle += " " + networkStyle->getTitleAddText();
@@ -207,7 +207,7 @@ void PIVXGUI::createTrayIcon(const NetworkStyle* networkStyle)
 {
 #ifndef Q_OS_MAC
     trayIcon = new QSystemTrayIcon(this);
-    QString toolTip = tr("__Decenomy__ client") + " " + networkStyle->getTitleAddText();
+    QString toolTip = tr("Concordia client") + " " + networkStyle->getTitleAddText();
     trayIcon->setToolTip(toolTip);
     trayIcon->setIcon(networkStyle->getAppIcon());
     trayIcon->hide();
@@ -360,7 +360,7 @@ void PIVXGUI::messageInfo(const QString& text)
 
 void PIVXGUI::message(const QString& title, const QString& message, unsigned int style, bool* ret)
 {
-    QString strTitle =  tr("__Decenomy__"); // default title
+    QString strTitle =  tr("Concordia"); // default title
     // Default to information icon
     int nNotifyIcon = Notificator::Information;
 
@@ -429,7 +429,7 @@ bool PIVXGUI::openStandardDialog(QString title, QString body, QString okBtn, QSt
     } else {
         dialog = new DefaultDialog();
         dialog->setText(title, body, okBtn);
-        dialog->setWindowTitle(tr("__Decenomy__"));
+        dialog->setWindowTitle(tr("Concordia"));
         dialog->adjustSize();
         dialog->raise();
         dialog->exec();

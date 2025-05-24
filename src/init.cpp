@@ -912,7 +912,7 @@ void InitLogging()
 #else
     version_string += " (release build)";
 #endif
-    LogPrintf("__Decenomy__ version %s (%s)\n", version_string, CLIENT_DATE);
+    LogPrintf("Concordia version %s (%s)\n", version_string, CLIENT_DATE);
 }
 
 /** Initialize wallet.

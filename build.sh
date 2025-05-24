@@ -28,7 +28,7 @@ fi
 
 # Sets variables needed for the build
 TICKER=${TICKER:-"${GITHUB_REPO}"}
-UI_NAME=${UI_NAME:-"__Decenomy__"}
+UI_NAME=${UI_NAME:-"Concordia"}
 BASE_NAME=${BASE_NAME:-"__decenomy__"}
 
 # Sets the build environment variable

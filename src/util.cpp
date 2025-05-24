@@ -92,7 +92,7 @@ const char * const PIVX_MASTERNODE_CONF_FILENAME = "masternode.conf";
 const char * const PIVX_ACTIVE_MASTERNODE_CONF_FILENAME = "activemasternode.conf";
 
 
-// __Decenomy__ only features
+// Concordia only features
 // Masternode
 bool fMasterNode = false;
 bool fStaking = false;
@@ -296,7 +296,7 @@ fs::path GetDefaultDataDir()
 // Unix: ~/.__decenomy__
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "__Decenomy__";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Concordia";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -308,7 +308,7 @@ fs::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     TryCreateDirectory(pathRet);
-    return pathRet / "__Decenomy__";
+    return pathRet / "Concordia";
 #else
     // Unix
     return pathRet / ".__decenomy__";

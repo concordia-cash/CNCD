@@ -40,7 +40,7 @@ jobs:
             --no-cache \
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
-            --build-arg NAME=__Decenomy__ \
+            --build-arg NAME=Concordia \
             --build-arg BASE_NAME=__decenomy__ \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
@@ -103,7 +103,7 @@ jobs:
             --no-cache \
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
-            --build-arg NAME=__Decenomy__ \
+            --build-arg NAME=Concordia \
             --build-arg BASE_NAME=__decenomy__ \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
@@ -166,7 +166,7 @@ jobs:
             --no-cache \
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
-            --build-arg NAME=__Decenomy__ \
+            --build-arg NAME=Concordia \
             --build-arg BASE_NAME=__decenomy__ \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
@@ -229,7 +229,7 @@ jobs:
             --no-cache \
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
-            --build-arg NAME=__Decenomy__ \
+            --build-arg NAME=Concordia \
             --build-arg BASE_NAME=__decenomy__ \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \

@@ -1508,7 +1508,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "__Decenomy__ " + FormatFullVersion();
+        std::string strDesc = "Concordia " + FormatFullVersion();
 
         try {
             while (true) {
