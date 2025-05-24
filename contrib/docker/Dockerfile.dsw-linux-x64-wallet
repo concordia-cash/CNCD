@@ -10,7 +10,7 @@ ARG TICKER=CNCD
 ARG NAME=Concordia
 ARG BASE_NAME=concordia
 ARG TARGET=master
-ARG GITHUB_USER=decenomy
+ARG GITHUB_USER=concordia-cash
 
 RUN sleep 30
 
