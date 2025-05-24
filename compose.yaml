@@ -1,18 +1,18 @@
 services:
-  __decenomy__:
+  concordia:
     image: ubuntu:24.04
-    container_name: __decenomy__-ctn
+    container_name: concordia-ctn
     restart: always
     ports:
       - "__PORT_MAINNET__:__PORT_MAINNET__"  # TCP mainnet port
       - "__RPCPORT_MAINNET__:__RPCPORT_MAINNET__"  # RPC mainnet port
     volumes:
-      - ${HOME}/.__decenomy__:/root/.__decenomy__:shared
+      - ${HOME}/.concordia:/root/.concordia:shared
     command:
       - bash
       - -c
       - |
-        if [ ! -f /usr/local/bin/__decenomy__d ]; then
+        if [ ! -f /usr/local/bin/concordiad ]; then
           echo "Concordia binary not found, setting up environment..."
           apt-get update && \
           apt-get install -y wget curl unzip && \
@@ -26,8 +26,8 @@ services:
           rm "$(cat latest_filename)" && \
           rm latest_filename && \
           rm latest_release_url && \
-          mv __decenomy__* /usr/local/bin;
+          mv concordia* /usr/local/bin;
         else
           echo "Concordia binary already installed, skipping setup."
         fi
-        __decenomy__d
+        concordiad

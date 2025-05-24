@@ -41,7 +41,7 @@ jobs:
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
             --build-arg NAME=Concordia \
-            --build-arg BASE_NAME=__decenomy__ \
+            --build-arg BASE_NAME=concordia \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
             -t ${IMAGE_NAME} \
@@ -104,7 +104,7 @@ jobs:
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
             --build-arg NAME=Concordia \
-            --build-arg BASE_NAME=__decenomy__ \
+            --build-arg BASE_NAME=concordia \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
             -t ${IMAGE_NAME} \
@@ -167,7 +167,7 @@ jobs:
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
             --build-arg NAME=Concordia \
-            --build-arg BASE_NAME=__decenomy__ \
+            --build-arg BASE_NAME=concordia \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
             -t ${IMAGE_NAME} \
@@ -230,7 +230,7 @@ jobs:
             --build-arg CPU_CORES=$(nproc) \
             --build-arg TICKER=$REPO_NAME \
             --build-arg NAME=Concordia \
-            --build-arg BASE_NAME=__decenomy__ \
+            --build-arg BASE_NAME=concordia \
             --build-arg TARGET=$SHORT_REF \
             --build-arg GITHUB_USER=$ACCOUNT_NAME \
             -t ${IMAGE_NAME} \

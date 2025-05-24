@@ -1,6 +1,6 @@
 [Protocol]
-exec=__decenomy__-qt '%u'
-protocol=__decenomy__
+exec=concordia-qt '%u'
+protocol=concordia
 input=none
 output=none
 helper=true

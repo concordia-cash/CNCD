@@ -51,7 +51,7 @@ static const int MAX_URI_LENGTH = 255;
 
 
 #define QAPP_ORG_NAME "Concordia"
-#define QAPP_ORG_DOMAIN "__decenomy__.org"
+#define QAPP_ORG_DOMAIN "concordia.org"
 #define QAPP_APP_NAME_DEFAULT "Concordia-Qt"
 #define QAPP_APP_NAME_TESTNET "Concordia-Qt-testnet"
 

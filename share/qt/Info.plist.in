@@ -38,7 +38,7 @@
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>io.__decenomy__.Concordia-Qt</string>
+  <string>io.concordia.Concordia-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>

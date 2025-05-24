@@ -13,8 +13,8 @@ The following are some helpful notes on how to run Concordia Core on your native
 
 Unpack the files into a directory and run:
 
-- `bin/__decenomy__-qt` (GUI) or
-- `bin/__decenomy__d` (headless)
+- `bin/concordia-qt` (GUI) or
+- `bin/concordiad` (headless)
 
 ### Windows
 

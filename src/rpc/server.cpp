@@ -363,22 +363,22 @@ static const CRPCCommand vRPCCommands[] =
         { "hidden",             "waitforblockheight",     &waitforblockheight,     true },
 
         /* __DSW__ features */
-        {"__decenomy__", "listmasternodes", &listmasternodes, true },
-        {"__decenomy__", "getmasternodecount", &getmasternodecount, true },
-        {"__decenomy__", "createmasternodebroadcast", &createmasternodebroadcast, true },
-        {"__decenomy__", "decodemasternodebroadcast", &decodemasternodebroadcast, true },
-        {"__decenomy__", "relaymasternodebroadcast", &relaymasternodebroadcast, true },
-        {"__decenomy__", "masternodecurrent", &masternodecurrent, true },
-        {"__decenomy__", "startmasternode", &startmasternode, true },
-        {"__decenomy__", "reloadmasternodeconfig", &reloadmasternodeconfig, true },
-        {"__decenomy__", "createmasternodekey", &createmasternodekey, true },
-        {"__decenomy__", "getmasternodeoutputs", &getmasternodeoutputs, true },
-        {"__decenomy__", "listmasternodeconf", &listmasternodeconf, true },
-        {"__decenomy__", "getactivemasternodecount", &getactivemasternodecount, true },
-        {"__decenomy__", "getmasternodestatus", &getmasternodestatus, true },
-        {"__decenomy__", "mnsync", &mnsync, true },
-        {"__decenomy__", "spork", &spork, true },
-        {"__decenomy__", "mnping", &mnping, true },
+        {"concordia", "listmasternodes", &listmasternodes, true },
+        {"concordia", "getmasternodecount", &getmasternodecount, true },
+        {"concordia", "createmasternodebroadcast", &createmasternodebroadcast, true },
+        {"concordia", "decodemasternodebroadcast", &decodemasternodebroadcast, true },
+        {"concordia", "relaymasternodebroadcast", &relaymasternodebroadcast, true },
+        {"concordia", "masternodecurrent", &masternodecurrent, true },
+        {"concordia", "startmasternode", &startmasternode, true },
+        {"concordia", "reloadmasternodeconfig", &reloadmasternodeconfig, true },
+        {"concordia", "createmasternodekey", &createmasternodekey, true },
+        {"concordia", "getmasternodeoutputs", &getmasternodeoutputs, true },
+        {"concordia", "listmasternodeconf", &listmasternodeconf, true },
+        {"concordia", "getactivemasternodecount", &getactivemasternodecount, true },
+        {"concordia", "getmasternodestatus", &getmasternodestatus, true },
+        {"concordia", "mnsync", &mnsync, true },
+        {"concordia", "spork", &spork, true },
+        {"concordia", "mnping", &mnping, true },
 
 #ifdef ENABLE_WALLET
         /* Wallet */
@@ -577,7 +577,7 @@ std::vector<std::string> CRPCTable::listCommands() const
 
 std::string HelpExampleCli(std::string methodname, std::string args)
 {
-    return "> __decenomy__-cli " + methodname + " " + args + "\n";
+    return "> concordia-cli " + methodname + " " + args + "\n";
 }
 
 std::string HelpExampleRpc(std::string methodname, std::string args)
