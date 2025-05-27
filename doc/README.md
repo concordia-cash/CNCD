@@ -56,7 +56,7 @@ The Concordia repo's [root README](/README.md) contains relevant information on 
 
 ### Resources
 * Discuss on the [Concordia Homepage](__decenomy_website_link__/).
-* Join the [Concordia Discord](https://discord.gg/W4vUeKQWaM).
+* Join the [Concordia Cash Discord](https://discord.gg/W4vUeKQWaM).
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)

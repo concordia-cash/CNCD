@@ -1,7 +1,7 @@
 <!--- Remove this description and sections that do not apply -->
 
 This issue tracker is only for technical issues related to Concordia Cash.
-General Concordia questions and/or support requests and are best directed to the [Concordia Discord](https://discord.gg/W4vUeKQWaM).
+General Concordia questions and/or support requests and are best directed to the [Concordia Cash Discord](https://discord.gg/W4vUeKQWaM).
 
 ### Describe the issue
 
