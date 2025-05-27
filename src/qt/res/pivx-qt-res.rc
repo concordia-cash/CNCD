@@ -20,13 +20,13 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        "Concordia"
-            VALUE "FileDescription",    "Concordia Core (OSS GUI client for Concordia)"
+            VALUE "FileDescription",    "Concordia Cash (OSS GUI client for Concordia)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "concordia-qt"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
             VALUE "OriginalFilename",   "concordia-qt.exe"
-            VALUE "ProductName",        "Concordia Core"
+            VALUE "ProductName",        "Concordia Cash"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

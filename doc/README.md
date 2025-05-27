@@ -1,13 +1,13 @@
-Concordia Core
+Concordia Cash
 =============
 
 Setup
 ---------------------
-[Concordia Core](__decenomy_website_link__/) is the original Concordia client and it builds the backbone of the network. However, it downloads and stores the entire history of Concordia transactions; depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more. Thankfully you only have to do this once.
+[Concordia Cash](__decenomy_website_link__/) is the original Concordia client and it builds the backbone of the network. However, it downloads and stores the entire history of Concordia transactions; depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more. Thankfully you only have to do this once.
 
 Running
 ---------------------
-The following are some helpful notes on how to run Concordia Core on your native platform.
+The following are some helpful notes on how to run Concordia Cash on your native platform.
 
 ### Unix
 
@@ -32,7 +32,7 @@ for help and more information.
 
 Building
 ---------------------
-The following are developer notes on how to build Concordia Core on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build Concordia Cash on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
 - [Dependencies](dependencies.md)
 - [macOS Build Notes](build-osx.md)

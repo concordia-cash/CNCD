@@ -15,7 +15,7 @@
  * for both concordiad and concordia-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("Concordia Core");
+const std::string CLIENT_NAME("Concordia Cash");
 
 /**
  * Client version number
