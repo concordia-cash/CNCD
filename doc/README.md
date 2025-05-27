@@ -28,7 +28,7 @@ Drag Concordia-Qt to your applications folder, and then run Concordia-Qt.
 
 * See the documentation at the [Concordia Wiki](https://github.com/concordia-cash/CNCD/)
 for help and more information.
-* Join our Discord server [Discord Server](__decenomy_discord_link__)
+* Join our Discord server [Discord Server](https://discord.gg/W4vUeKQWaM)
 
 Building
 ---------------------
@@ -56,7 +56,7 @@ The Concordia repo's [root README](/README.md) contains relevant information on 
 
 ### Resources
 * Discuss on the [Concordia Homepage](__decenomy_website_link__/).
-* Join the [Concordia Discord](__decenomy_discord_link__).
+* Join the [Concordia Discord](https://discord.gg/W4vUeKQWaM).
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
