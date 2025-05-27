@@ -227,7 +227,6 @@ public:
     unsigned int nTime{0};
     unsigned int nBits{0};
     unsigned int nNonce{0};
-    uint256 nAccumulatorCheckpoint{};
 
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId{0};
@@ -327,10 +326,6 @@ public:
             READWRITE(nBits);
             READWRITE(nNonce);
 
-            if(this->nVersion > 3 && this->nVersion < 7) {
-                READWRITE(nAccumulatorCheckpoint);
-            }
-
             if (this->nVersion >= 7 && nSerVersion >= DBI_SER_VERSION_MS) {
                 READWRITE(nMoneySupply);
             }
@@ -364,9 +359,6 @@ public:
             READWRITE(nTime);
             READWRITE(nBits);
             READWRITE(nNonce);
-            if(this->nVersion > 3) {
-                READWRITE(nAccumulatorCheckpoint);
-            }
         }
     }
 
@@ -380,8 +372,6 @@ public:
         block.nTime = nTime;
         block.nBits = nBits;
         block.nNonce = nNonce;
-        if (nVersion > 3 && nVersion < 7)
-            block.nAccumulatorCheckpoint = nAccumulatorCheckpoint;
         return block.GetHash();
     }
 
