@@ -26,7 +26,7 @@ Drag Concordia-Qt to your applications folder, and then run Concordia-Qt.
 
 ### Need Help?
 
-* See the documentation at the [Concordia Wiki](https://__decenomy_github_link__/)
+* See the documentation at the [Concordia Wiki](https://github.com/concordia-cash/CNCD/)
 for help and more information.
 * Join our Discord server [Discord Server](__decenomy_discord_link__)
 
@@ -48,7 +48,7 @@ The Concordia repo's [root README](/README.md) contains relevant information on 
 - [Multiwallet Qt Development](multiwallet-qt.md)
 - [Release Notes](release-notes.md)
 - [Release Process](release-process.md)
-- [Source Code Documentation (External Link)](https://__decenomy_github_link__/)
+- [Source Code Documentation (External Link)](https://github.com/concordia-cash/CNCD/)
 - [Translation Process](translation_process.md)
 - [Unit Tests](unit-tests.md)
 - [Unauthenticated REST Interface](REST-interface.md)
