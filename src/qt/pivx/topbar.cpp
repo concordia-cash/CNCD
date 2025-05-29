@@ -467,7 +467,7 @@ void TopBar::updateStakingStatus()
     if(fStakingActive && fStakingStatus && pwalletMain->pStakerStatus->GetLastValue() > 100) {
         const Consensus::Params& consensus = Params().GetConsensus();
         CBlockIndex* pindexPrev = GetChainTip();
-        ui->labelWalletHashRateValue->setText(GetReadableHashRate((pwalletMain->pStakerStatus->GetLastValue() / 100) / consensus.TimeSlotLength(chainActive.Tip()->nHeight + 1)).c_str());
+        ui->labelWalletHashRateValue->setText(GetReadableHashRate((pwalletMain->pStakerStatus->GetLastValue() / 100) / consensus.nTimeSlotLength).c_str());
     } else {
         ui->labelWalletHashRateValue->setText("-- H/s");
     }

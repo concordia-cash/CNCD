@@ -98,7 +98,7 @@ void UpdateTime(CBlockHeader* pblock, const CBlockIndex* pindexPrev)
 
     // Updating time can change work required on testnet:
     if (Params().GetConsensus().fPowAllowMinDifficultyBlocks)
-        pblock->nBits = GetNextWorkRequired(pindexPrev, pblock);
+        pblock->nBits = GetNextWorkRequired(pindexPrev);
 }
 
 bool CreateCoinbaseTx(CBlock* pblock, const CScript& scriptPubKeyIn, CBlockIndex* pindexPrev)
@@ -126,7 +126,7 @@ bool CreateCoinbaseTx(CBlock* pblock, const CScript& scriptPubKeyIn, CBlockIndex
 bool SolveProofOfStake(CBlock* pblock, CBlockIndex* pindexPrev, CWallet* pwallet, std::vector<COutput>* availableCoins)
 {
     boost::this_thread::interruption_point();
-    pblock->nBits = GetNextWorkRequired(pindexPrev, pblock);
+    pblock->nBits = GetNextWorkRequired(pindexPrev);
     CMutableTransaction txCoinStake;
     int64_t nTxNewTime = 0;
     if (!pwallet->CreateCoinStake(*pwallet, pindexPrev, pblock->nBits, txCoinStake, nTxNewTime, availableCoins)) {
@@ -160,14 +160,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
     // Make sure to create the correct block version
     const Consensus::Params& consensus = Params().GetConsensus();
 
-    if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_TIME_PROTOCOL_V2))
-        pblock->nVersion = 7;
-    else if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2))
-        pblock->nVersion = 6;
-    else if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_BIP65))
-        pblock->nVersion = 5;
-    else
-        pblock->nVersion = 3;
+    pblock->nVersion = 3;
 
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
@@ -399,7 +392,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn, CWallet* pwallet, 
         pblock->hashPrevBlock = pindexPrev->GetBlockHash();
         if (!fProofOfStake)
             UpdateTime(pblock, pindexPrev);
-        pblock->nBits = GetNextWorkRequired(pindexPrev, pblock);
+        pblock->nBits = GetNextWorkRequired(pindexPrev);
         pblock->nNonce = 0;
 
         pblocktemplate->vTxSigOps[0] = GetLegacySigOpCount(pblock->vtx[0]);
@@ -524,7 +517,7 @@ uint64_t GetNetworkHashPS()
 
     if (!pb || !pb->nHeight) return 0; 
 
-    uint64_t n_blocks = Params().GetConsensus().TargetTimespan(pb->nHeight) / Params().GetConsensus().nTargetSpacing;
+    uint64_t n_blocks = Params().GetConsensus().nTargetTimespan / Params().GetConsensus().nTargetSpacing;
 
     if (pb->nHeight < n_blocks)
         n_blocks = pb->nHeight;

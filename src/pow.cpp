@@ -18,124 +18,20 @@
 
 #include <math.h>
 
-unsigned int GetNextWorkRequiredPOW(const CBlockIndex* pindexLast)
-{
-    const auto& params = Params();
-    const auto& consensus = params.GetConsensus();
-
-    /* current difficulty formula, concordia - DarkGravity v3, written by Evan Duffield - evan@dashpay.io */
-    const CBlockIndex* BlockLastSolved = pindexLast;
-    const CBlockIndex* BlockReading = pindexLast;
-    int64_t nActualTimespan = 0;
-    int64_t LastBlockTime = 0;
-    int64_t PastBlocksMin = 24;
-    int64_t PastBlocksMax = 24;
-    int64_t CountBlocks = 0;
-    uint256 PastDifficultyAverage;
-    uint256 PastDifficultyAveragePrev;
-
-    if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || BlockLastSolved->nHeight < PastBlocksMin) {
-        return consensus.powLimit.GetCompact();
-    }
-
-    for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
-        if (PastBlocksMax > 0 && i > PastBlocksMax) {
-            break;
-        }
-        CountBlocks++;
-
-        if (CountBlocks <= PastBlocksMin) {
-            if (CountBlocks == 1) {
-                PastDifficultyAverage.SetCompact(BlockReading->nBits);
-            } else {
-                PastDifficultyAverage = ((PastDifficultyAveragePrev * CountBlocks) + (uint256().SetCompact(BlockReading->nBits))) / (CountBlocks + 1);
-            }
-            PastDifficultyAveragePrev = PastDifficultyAverage;
-        }
-
-        if (LastBlockTime > 0) {
-            int64_t Diff = (LastBlockTime - BlockReading->GetBlockTime());
-            nActualTimespan += Diff;
-        }
-        LastBlockTime = BlockReading->GetBlockTime();
-
-        if (BlockReading->pprev == NULL) {
-            assert(BlockReading);
-            break;
-        }
-        BlockReading = BlockReading->pprev;
-    }
-
-    uint256 bnNew(PastDifficultyAverage);
-
-    int64_t _nTargetTimespan = CountBlocks * consensus.nTargetSpacing;
-
-    if (nActualTimespan < _nTargetTimespan / 3)
-        nActualTimespan = _nTargetTimespan / 3;
-    if (nActualTimespan > _nTargetTimespan * 3)
-        nActualTimespan = _nTargetTimespan * 3;
-
-    // Retarget
-    bnNew *= nActualTimespan;
-    bnNew /= _nTargetTimespan;
-
-    if (bnNew > consensus.powLimit) {
-        bnNew = consensus.powLimit;
-    }
-
-    return bnNew.GetCompact();
-}
-
-unsigned int GetNextWorkRequiredPOS(const CBlockIndex* pindexLast)
-{
-    const auto& params = Params();
-    const auto& consensus = params.GetConsensus();
-
-    const auto nHeight = pindexLast->nHeight + 1;
-    const auto fIsTimeProtocolV2 = consensus.IsTimeProtocolV2(nHeight);
-    const auto nTargetTimespan = consensus.TargetTimespan(nHeight);
-    const auto posLimit = consensus.ProofOfStakeLimit(fIsTimeProtocolV2);
-
-    int64_t nActualSpacing = 0;
-    if (pindexLast->nHeight != 0)
-        nActualSpacing = pindexLast->GetBlockTime() - pindexLast->pprev->GetBlockTime();
-    if (nActualSpacing < 0)
-        nActualSpacing = 1;
-    if (fIsTimeProtocolV2 && nActualSpacing > consensus.nTargetSpacing * 10)
-        nActualSpacing = consensus.nTargetSpacing * 10;
-
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
-    uint256 bnNew;
-    bnNew.SetCompact(pindexLast->nBits);
-
-    // On first block with V2 time protocol, reduce the difficulty by a factor 16
-    if (fIsTimeProtocolV2 && !consensus.IsTimeProtocolV2(pindexLast->nHeight))
-        bnNew <<= 4;
-
-    int64_t nInterval = nTargetTimespan / consensus.nTargetSpacing;
-    bnNew *= ((nInterval - 1) * consensus.nTargetSpacing + nActualSpacing + nActualSpacing);
-    bnNew /= ((nInterval + 1) * consensus.nTargetSpacing);
-
-    if (bnNew > posLimit)
-        bnNew = posLimit;
-
-    return bnNew.GetCompact();
-}
-
-unsigned int GetNextWorkRequiredPOSV2(const CBlockIndex* pIndexLast)
+unsigned int GetNextWorkRequired(const CBlockIndex* pIndexLast)
 {
     // Retrieve the parameters and consensus rules
     const auto& params = Params();
     const auto& consensus = params.GetConsensus();
+
+    if (params.IsRegTestNet()) return pIndexLast->nBits;
 
     // Get the current block height
     const auto nPrevHeight = pIndexLast->nHeight;
     const auto nHeight = nPrevHeight + 1;
 
     // Get additional parameters
-    const auto fIsTimeProtocolV2 = consensus.IsTimeProtocolV2(nHeight);
-    const auto posLimit = consensus.ProofOfStakeLimit(fIsTimeProtocolV2);
+    const auto powLimit = consensus.powLimit;
  
     // Fetch the target block spacing time and timespan
     int64_t nTargetSpacing = consensus.nTargetSpacing;
@@ -223,30 +119,11 @@ unsigned int GetNextWorkRequiredPOSV2(const CBlockIndex* pIndexLast)
     bnNew /= nK * nFinalTargetSpacing;
 
     // Ensure the new difficulty does not exceed the minimum allowed by consensus
-    if (bnNew > posLimit)
-        bnNew = posLimit;
+    if (bnNew > powLimit)
+        bnNew = powLimit;
 
     // Return the new difficulty in compact format
     return bnNew.GetCompact();
-}
-
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock)
-{
-    const auto& params = Params();
-    const auto& consensus = params.GetConsensus();
-    const auto nHeight = pindexLast->nHeight + 1;
-
-    if (params.IsRegTestNet()) return pindexLast->nBits;
-
-    if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_POS_V3)) {
-        return GetNextWorkRequiredPOSV2(pindexLast);
-    }
-
-    if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_POS)) {
-        return GetNextWorkRequiredPOS(pindexLast);
-    }
-
-    return GetNextWorkRequiredPOW(pindexLast);
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)

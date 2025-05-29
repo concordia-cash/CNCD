@@ -67,7 +67,7 @@ CAmount CPivStake::GetValue() const
     return txFrom.vout[nPosition].nValue;
 }
 
-bool CPivStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal, const bool onlyP2PK)
+bool CPivStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmount nTotal)
 {
     std::vector<valtype> vSolutions;
     txnouttype whichType;
@@ -86,15 +86,7 @@ bool CPivStake::CreateTxOuts(CWallet* pwallet, std::vector<CTxOut>& vout, CAmoun
             return error("%s: Unable to get staking private key", __func__);
     }
 
-    // Consensus check: P2PKH block signatures were not accepted before v5 update.
-    // This can be removed after v5.0 enforcement
-    if (whichType == TX_PUBKEYHASH && onlyP2PK) {
-        // convert to P2PK inputs
-        scriptPubKey << key.GetPubKey() << OP_CHECKSIG;
-    } else {
-        // keep the same script
-        scriptPubKey = scriptPubKeyKernel;
-    }
+    scriptPubKey = scriptPubKeyKernel;
 
     vout.emplace_back(CTxOut(0, scriptPubKey));
 
@@ -157,7 +149,7 @@ bool CPivStake::ContextCheck(int nHeight, uint32_t nTime)
     const uint32_t nTimeBlockFrom = pindexFrom->nTime;
 
     // Check that the stake has the required depth/age
-    if (!consensus.HasStakeMinAgeOrDepth(nHeight, nTime, nHeightBlockFrom, nTimeBlockFrom)) {
+    if (!consensus.HasStakeMinAgeOrDepth(nHeight, nHeightBlockFrom)) {
         return error("%s : min age violation - height=%d - time=%d, nHeightBlockFrom=%d, nTimeBlockFrom=%d",
                          __func__, nHeight, nTime, nHeightBlockFrom, nTimeBlockFrom);
     }

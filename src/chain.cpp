@@ -9,8 +9,6 @@
 #include "chain.h"
 #include "masternode.h"
 #include "masternodeman.h"
-#include "legacy/stakemodifier.h"  // for ComputeNextStakeModifier
-
 
 /**
  * CChain implementation
@@ -128,18 +126,20 @@ int64_t CBlockIndex::MaxFutureBlockTime() const
 
 int64_t CBlockIndex::MinPastBlockTime() const
 {
-    const Consensus::Params& consensus = Params().GetConsensus();
-    // Time Protocol v1: pindexPrev->MedianTimePast + 1
-    if (!consensus.IsTimeProtocolV2(nHeight+1))
+    const auto& params = Params(); 
+    const auto& consensus = params.GetConsensus();
+
+    // PoW: pindexPrev->MedianTimePast + 1
+    if (nHeight < consensus.vUpgrades[Consensus::UPGRADE_POS].nActivationHeight)
         return GetMedianTimePast();
 
-    // on the transition from Time Protocol v1 to v2
+    // on the transition from PoW to PoS
     // pindexPrev->nTime might be in the future (up to the allowed drift)
-    // so we allow the nBlockTimeProtocolV2 (PIVX v4.0) to be at most (180-14) seconds earlier than previous block
-    if (nHeight + 1 == consensus.vUpgrades[Consensus::UPGRADE_TIME_PROTOCOL_V2].nActivationHeight)
+    // so we allow the time to be at most (180-14) seconds earlier than previous block
+    if (nHeight + 1 == consensus.vUpgrades[Consensus::UPGRADE_POS].nActivationHeight)
         return GetBlockTime() - consensus.FutureBlockTimeDrift(nHeight) + consensus.FutureBlockTimeDrift(nHeight + 1);
 
-    // Time Protocol v2: pindexPrev->nTime
+    // PoS: pindexPrev->nTime
     return GetBlockTime();
 }
 
@@ -159,48 +159,6 @@ int64_t CBlockIndex::GetMedianTimePast() const
     return pbegin[(pend - pbegin) / 2];
 }
 
-unsigned int CBlockIndex::GetStakeEntropyBit() const
-{
-    unsigned int nEntropyBit = ((GetBlockHash().GetCheapHash()) & 1);
-    if (GetBoolArg("-printstakemodifier", false))
-        LogPrintf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetBlockHash().ToString().c_str(), nEntropyBit);
-
-    return nEntropyBit;
-}
-
-bool CBlockIndex::SetStakeEntropyBit(unsigned int nEntropyBit)
-{
-    if (nEntropyBit > 1)
-        return false;
-    nFlags |= (nEntropyBit ? BLOCK_STAKE_ENTROPY : 0);
-    return true;
-}
-
-// Sets V1 stake modifier (uint64_t)
-void CBlockIndex::SetStakeModifier(const uint64_t nStakeModifier, bool fGeneratedStakeModifier)
-{
-    vStakeModifier.clear();
-    const size_t modSize = sizeof(nStakeModifier);
-    vStakeModifier.resize(modSize);
-    std::memcpy(vStakeModifier.data(), &nStakeModifier, modSize);
-    if (fGeneratedStakeModifier)
-        nFlags |= BLOCK_STAKE_MODIFIER;
-
-}
-
-// Generates and sets new V1 stake modifier
-void CBlockIndex::SetNewStakeModifier()
-{
-    // compute stake entropy bit for stake modifier
-    if (!SetStakeEntropyBit(GetStakeEntropyBit()))
-        LogPrintf("%s : SetStakeEntropyBit() failed\n", __func__);
-    uint64_t nStakeModifier = 0;
-    bool fGeneratedStakeModifier = false;
-    if (!ComputeNextStakeModifier(pprev, nStakeModifier, fGeneratedStakeModifier))
-        LogPrintf("%s : ComputeNextStakeModifier() failed \n",  __func__);
-    return SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
-}
-
 // Sets V2 stake modifiers (uint256)
 void CBlockIndex::SetStakeModifier(const uint256& nStakeModifier)
 {
@@ -208,34 +166,23 @@ void CBlockIndex::SetStakeModifier(const uint256& nStakeModifier)
     vStakeModifier.insert(vStakeModifier.begin(), nStakeModifier.begin(), nStakeModifier.end());
 }
 
-// Generates and sets new V2 stake modifier
-void CBlockIndex::SetNewStakeModifier(const uint256& prevoutId)
+// Generates and sets the stake modifier
+void CBlockIndex::SetNewStakeModifier(const uint256& prevoutId, const uint32_t& prevoutN)
 {
-    // Shouldn't be called on V1 modifier's blocks (or before setting pprev)
-    if (!Params().GetConsensus().NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2)) return;
     if (!pprev) throw std::runtime_error(strprintf("%s : ERROR: null pprev", __func__));
 
-    // Generate Hash(prevoutId | prevModifier) - switch with genesis modifier (0) on upgrade block
+    // Generate Hash(prevoutId | prevoutN | prevModifier)
     CHashWriter ss(SER_GETHASH, 0);
     ss << prevoutId;
-    ss << pprev->GetStakeModifierV2();
+    ss << prevoutN;
+    ss << pprev->GetStakeModifier();
     SetStakeModifier(ss.GetHash());
 }
 
-// Returns V1 stake modifier (uint64_t)
-uint64_t CBlockIndex::GetStakeModifierV1() const
+// Returns stake modifier (uint256)
+uint256 CBlockIndex::GetStakeModifier() const
 {
-    if (vStakeModifier.empty() || Params().GetConsensus().NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2))
-        return 0;
-    uint64_t nStakeModifier;
-    std::memcpy(&nStakeModifier, vStakeModifier.data(), vStakeModifier.size());
-    return nStakeModifier;
-}
-
-// Returns V2 stake modifier (uint256)
-uint256 CBlockIndex::GetStakeModifierV2() const
-{
-    if (vStakeModifier.empty() || !Params().GetConsensus().NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2))
+    if (vStakeModifier.empty())
         return UINT256_ZERO;
     uint256 nStakeModifier;
     std::memcpy(nStakeModifier.begin(), vStakeModifier.data(), vStakeModifier.size());

@@ -251,15 +251,9 @@ public:
     void SetProofOfStake() { nFlags |= BLOCK_PROOF_OF_STAKE; }
 
     // Stake Modifier
-    unsigned int GetStakeEntropyBit() const;
-    bool SetStakeEntropyBit(unsigned int nEntropyBit);
-    bool GeneratedStakeModifier() const { return (nFlags & BLOCK_STAKE_MODIFIER); }
-    void SetStakeModifier(const uint64_t nStakeModifier, bool fGeneratedStakeModifier);
-    void SetNewStakeModifier();                             // generates and sets new v1 modifier
     void SetStakeModifier(const uint256& nStakeModifier);
-    void SetNewStakeModifier(const uint256& prevoutId);     // generates and sets new v2 modifier
-    uint64_t GetStakeModifierV1() const;
-    uint256 GetStakeModifierV2() const;
+    void SetNewStakeModifier(const uint256& prevoutId, const uint32_t& prevoutN); // generates and sets new modifier
+    uint256 GetStakeModifier() const;
     CScript GetPaidPayee() const;
 
     //! Check whether this block index entry is valid up to the passed validity level.
@@ -273,13 +267,6 @@ public:
     CBlockIndex* GetAncestor(int height);
     const CBlockIndex* GetAncestor(int height) const;
 };
-
-/** Used to marshal pointers into hashes for db storage. */
-
-// New serialization introduced on PIVX
-static const int DBI_SER_VERSION_NO_MS = 0;   // removes nMoneySupply from persisted block index
-// New serialization introduced on DSW
-static const int DBI_SER_VERSION_MS = INT32_MAX;   // reintroduces the nMoneySupply to the persisted block index
 
 class CDiskBlockIndex : public CBlockIndex
 {
@@ -315,51 +302,14 @@ public:
         if (nStatus & BLOCK_HAVE_UNDO)
             READWRITE(VARINT(nUndoPos));
 
-        if (nSerVersion >= DBI_SER_VERSION_NO_MS) {
-            // Serialization with CLIENT_VERSION >= DBI_SER_VERSION_NO_MS
-            READWRITE(nFlags);
-            READWRITE(this->nVersion);
-            READWRITE(vStakeModifier);
-            READWRITE(hashPrev);
-            READWRITE(hashMerkleRoot);
-            READWRITE(nTime);
-            READWRITE(nBits);
-            READWRITE(nNonce);
-
-            if (this->nVersion >= 7 && nSerVersion >= DBI_SER_VERSION_MS) {
-                READWRITE(nMoneySupply);
-            }
-
-        } else if (ser_action.ForRead()) {
-            // Serialization with CLIENT_VERSION <= DBI_SER_VERSION_NO_MS
-            int64_t nMint = 0;
-            uint256 hashNext{};
-            READWRITE(nMint);
-            READWRITE(nMoneySupply);
-            READWRITE(nFlags);
-            if (!Params().GetConsensus().NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2)) {
-                uint64_t nStakeModifier = 0;
-                READWRITE(nStakeModifier);
-                this->SetStakeModifier(nStakeModifier, this->GeneratedStakeModifier());
-            } else {
-                uint256 nStakeModifierV2;
-                READWRITE(nStakeModifierV2);
-                this->SetStakeModifier(nStakeModifierV2);
-            }
-            if (IsProofOfStake()) {
-                COutPoint prevoutStake;
-                unsigned int nStakeTime = 0;
-                READWRITE(prevoutStake);
-                READWRITE(nStakeTime);
-            }
-            READWRITE(this->nVersion);
-            READWRITE(hashPrev);
-            READWRITE(hashNext);
-            READWRITE(hashMerkleRoot);
-            READWRITE(nTime);
-            READWRITE(nBits);
-            READWRITE(nNonce);
-        }
+        READWRITE(nFlags);
+        READWRITE(this->nVersion);
+        READWRITE(vStakeModifier);
+        READWRITE(hashPrev);
+        READWRITE(hashMerkleRoot);
+        READWRITE(nTime);
+        READWRITE(nBits);
+        READWRITE(nNonce);
     }
 
 

@@ -124,7 +124,6 @@ BITCOIN_CORE_H = \
   httpserver.h \
   init.h \
   interface/wallet.h \
-  legacy/stakemodifier.h \
   kernel.h \
   key.h \
   key_io.h \
@@ -296,7 +295,6 @@ libbitcoin_wallet_a_SOURCES = \
   masternodeconfig.cpp \
   masternodeman.cpp \
   messagesigner.cpp \
-  legacy/stakemodifier.cpp \
   kernel.cpp \
   wallet/db.cpp \
   wallet/rpcdump.cpp \

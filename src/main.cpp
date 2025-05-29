@@ -866,24 +866,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         return state.Invalid(false, REJECT_ALREADY_KNOWN, "txn-already-in-mempool");
     }
 
-    // ----------- burn address scanning -----------
-    if (!consensus.mBurnAddresses.empty()) {
-        for (unsigned int i = 0; i < tx.vin.size(); ++i) {
-            uint256 hashBlock;
-            CTransaction txPrev;
-            if (GetTransaction(tx.vin[i].prevout.hash, txPrev, hashBlock, true)) { // get the vin's previous transaction
-                CTxDestination source;
-                if (ExtractDestination(txPrev.vout[tx.vin[i].prevout.n].scriptPubKey, source)) { // extract the destination of the previous transaction's vout[n]
-                    const std::string addr = EncodeDestination(source);
-                    if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                        consensus.mBurnAddresses.at(addr) < chainHeight) {
-                        return state.DoS(0, false, REJECT_INVALID, "bad-txns-invalid-outputs");
-                    }
-                }
-            }
-        }
-    }
-
     // Check for conflicts with in-memory transactions
     {
         LOCK(pool.cs); // protect pool.mapNextTx
@@ -895,7 +877,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
             }
         }
     }
-
 
     {
         CCoinsView dummy;
@@ -1036,13 +1017,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
             return state.DoS(0, error("%s : %s", __func__, errString), REJECT_NONSTANDARD, "too-long-mempool-chain", false);
         }
 
-        bool fCLTVIsActivated = consensus.NetworkUpgradeActive(chainHeight, Consensus::UPGRADE_BIP65);
-
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
-        int flags = STANDARD_SCRIPT_VERIFY_FLAGS;
-        if (fCLTVIsActivated)
-            flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+        int flags = STANDARD_SCRIPT_VERIFY_FLAGS | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
 
         PrecomputedTransactionData precomTxData(tx);
         if (!CheckInputs(tx, state, view, true, flags, true, precomTxData)) {
@@ -1058,9 +1035,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         // There is a similar check in CreateNewBlock() to prevent creating
         // invalid blocks, however allowing such transactions into the mempool
         // can be exploited as a DoS attack.
-        flags = MANDATORY_SCRIPT_VERIFY_FLAGS;
-        if (fCLTVIsActivated)
-            flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+        flags = MANDATORY_SCRIPT_VERIFY_FLAGS | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
         if (!CheckInputs(tx, state, view, true, flags, true, precomTxData)) {
             return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags %s, %s",
                     __func__, hash.ToString(), FormatStateMessage(state));
@@ -1250,13 +1225,9 @@ bool AcceptableInputs(CTxMemPool& pool, CValidationState& state, const CTransact
                 hash.ToString(),
                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
-        bool fCLTVIsActivated = consensus.NetworkUpgradeActive(chainActive.Tip()->nHeight, Consensus::UPGRADE_BIP65);
-
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
-        int flags = STANDARD_SCRIPT_VERIFY_FLAGS;
-        if (fCLTVIsActivated)
-            flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+        int flags = STANDARD_SCRIPT_VERIFY_FLAGS | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
 
         PrecomputedTransactionData precomTxData(tx);
         if (!CheckInputs(tx, state, view, false, flags, true, precomTxData)) {
@@ -2060,12 +2031,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     bool fScriptChecks = pindex->nHeight >= Checkpoints::GetTotalBlocksEstimate();
 
-    // If scripts won't be checked anyways, don't bother seeing if CLTV is activated
-    bool fCLTVIsActivated = false;
-    if (fScriptChecks && pindex->pprev) {
-        fCLTVIsActivated = consensus.NetworkUpgradeActive(pindex->pprev->nHeight, Consensus::UPGRADE_BIP65);
-    }
-
     CCheckQueueControl<CScriptCheck> control(fScriptChecks && nScriptCheckThreads ? &scriptcheckqueue : nullptr);
 
     int64_t nTimeStart = GetTimeMicros();
@@ -2116,9 +2081,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
             nValueIn += view.GetValueIn(tx);
 
             std::vector<CScriptCheck> vChecks;
-            unsigned int flags = SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_DERSIG;
-            if (fCLTVIsActivated)
-                flags |= SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+            unsigned int flags = SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_DERSIG | SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
 
             bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
             if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, precomTxData[i], nScriptCheckThreads ? &vChecks : NULL))
@@ -2127,20 +2090,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         }
         nValueOut += tx.GetValueOut();
         nUnspendableValue += tx.GetUnspendableValueOut();
-
-        // ----------- burn address scanning -----------
-        if(nHeight > nLastCheckpointHeight) {
-            for (unsigned int i = 0; i < tx.vout.size(); i++) {
-                CTxDestination source;
-                if (tx.vout[i].scriptPubKey.IsNormalPaymentScript() && ExtractDestination(tx.vout[i].scriptPubKey, source)) {
-                    const std::string addr = EncodeDestination(source);
-                    if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                        consensus.mBurnAddresses.at(addr) < nHeight) {
-                        nUnspendableValue += tx.vout[i].nValue;
-                    }
-                }
-            }
-        }
 
         CTxUndo undoDummy;
         if (i > 0) {
@@ -2206,33 +2155,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     // add this block to the view's block chain
     view.SetBestBlock(pindex->GetBlockHash());
-
-    // Recalculate the money supply taking in account the existent burn addresses
-    if(nHeight == nLastCheckpointHeight)
-    {
-        std::unique_ptr<CCoinsViewCursor> pcursor(pcoinsTip->Cursor());
-
-        while (pcursor->Valid()) {
-            boost::this_thread::interruption_point();
-            COutPoint key;
-            Coin coin;
-            if (pcursor->GetKey(key) && pcursor->GetValue(coin)) {
-                // ----------- burn address scanning -----------
-                CTxDestination source;
-                if (ExtractDestination(coin.out.scriptPubKey, source)) {
-                    const std::string addr = EncodeDestination(source);
-                    if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                        consensus.mBurnAddresses.at(addr) < nHeight) 
-                    {
-                        nUnspendableValue += coin.out.nValue;
-                        pcursor->Next();
-                        continue;
-                    }
-                }
-            }
-            pcursor->Next();
-        }
-    }
 
     // Update money supply
     pindex->nMoneySupply = pindex->pprev->nMoneySupply.get() + (nValueOut - nValueIn - nUnspendableValue);
@@ -2936,14 +2858,14 @@ CBlockIndex* AddToBlockIndex(const CBlock& block)
         pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
         pindexNew->BuildSkip();
 
-        const Consensus::Params& consensus = Params().GetConsensus();
-        if (!consensus.NetworkUpgradeActive(pindexNew->nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2)) {
-            // compute and set new V1 stake modifier (entropy bits)
-            pindexNew->SetNewStakeModifier();
-
-        } else {
-            // compute and set new V2 stake modifier (hash of prevout and prevModifier)
-            pindexNew->SetNewStakeModifier(block.vtx[1].vin[0].prevout.hash);
+        const auto& params = Params();
+        const auto& consensus = params.GetConsensus();
+        if (consensus.NetworkUpgradeActive(pindexNew->nHeight, Consensus::UPGRADE_POS)) {
+            // compute and set new stake modifier (hash of prevout and prevModifier)
+            pindexNew->SetNewStakeModifier(
+                block.vtx[1].vin[0].prevout.hash, 
+                block.vtx[1].vin[0].prevout.n
+            );
         }
     }
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
@@ -3208,7 +3130,7 @@ bool CheckWork(const CBlock block, CBlockIndex* const pindexPrev)
     if (pindexPrev == NULL)
         return error("%s : null pindexPrev for block %s", __func__, block.GetHash().GetHex());
 
-    unsigned int nBitsRequired = GetNextWorkRequired(pindexPrev, &block);
+    const auto nBitsRequired = GetNextWorkRequired(pindexPrev);
 
     if (block.nBits != nBitsRequired) {
         return error("%s : incorrect proof of work at %d", __func__, pindexPrev->nHeight + 1);
@@ -3299,10 +3221,7 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
         return state.DoS(0, error("%s : forked chain older than last checkpoint (height %d)", __func__, nHeight));
 
     // Reject outdated version blocks
-    if((block.nVersion < 3 && nHeight >= 1) ||
-        (block.nVersion < 5 && consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_BIP65)) ||
-        (block.nVersion < 6 && consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2)) ||
-        (block.nVersion < 7 && consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_TIME_PROTOCOL_V2)))
+    if((block.nVersion < 3 && nHeight >= 1))
     {
         std::string stringErr = strprintf("rejected block version %d at height %d", block.nVersion, nHeight);
         return state.Invalid(false, REJECT_OBSOLETE, "bad-version", stringErr);
@@ -3346,28 +3265,6 @@ bool ContextualCheckBlock(const CBlock& block, CValidationState& state, CBlockIn
     for (const CTransaction& tx : block.vtx) {
         if (!IsFinalTx(tx, nHeight, block.GetBlockTime())) {
             return state.DoS(10, false, REJECT_INVALID, "bad-txns-nonfinal", false, "non-final transaction");
-        }
-    }
-
-    // ----------- burn address scanning -----------
-    if (!consensus.mBurnAddresses.empty()) {
-        for (const CTransaction& tx : block.vtx) {
-            if (!tx.IsCoinBase()) {
-                for (unsigned int i = 0; i < tx.vin.size(); ++i) {
-                    uint256 hashBlock;
-                    CTransaction txPrev;
-                    if (GetTransaction(tx.vin[i].prevout.hash, txPrev, hashBlock, true)) { // get the vin's previous transaction
-                        CTxDestination source;
-                        if (ExtractDestination(txPrev.vout[tx.vin[i].prevout.n].scriptPubKey, source)) { // extract the destination of the previous transaction's vout[n]
-                            const std::string addr = EncodeDestination(source);
-                            if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                                consensus.mBurnAddresses.at(addr) < nHeight) {
-                                return state.DoS(100, error("%s : Burned address %s tried to send a transaction %s (rejecting it).", __func__, addr.c_str(), txPrev.GetHash().ToString().c_str()), REJECT_INVALID, "bad-txns-banned");
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -3714,8 +3611,7 @@ bool ProcessNewBlock(CValidationState& state, CNode* pfrom, const CBlock* pblock
         // For now, we need the tip to know whether p2pkh block signatures are accepted or not.
         // After 5.0, this can be removed and replaced by the enforcement block time.
         newHeight = chainActive.Height() + 1;
-        const bool enableP2PKH = consensus.NetworkUpgradeActive(newHeight, Consensus::UPGRADE_P2PKH_BLOCK_SIGNATURES);
-        if (!CheckBlockSignature(*pblock, enableP2PKH))
+        if (!CheckBlockSignature(*pblock))
             return error("%s : bad proof-of-stake block signature", __func__);
 
         if (pblock->GetHash() != consensus.hashGenesisBlock && pfrom != NULL) {
@@ -4095,18 +3991,9 @@ void ResyncSupply()
         boost::this_thread::interruption_point();
         COutPoint key;
         Coin coin;
-        if (pcursor->GetKey(key) && pcursor->GetValue(coin) && !coin.IsSpent()) {
-            // ----------- burn address scanning -----------
-            CTxDestination source;
-            if (ExtractDestination(coin.out.scriptPubKey, source)) {
-                const std::string addr = EncodeDestination(source);
-                if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                    consensus.mBurnAddresses.at(addr) < chainActive.Height()) {
-                    pcursor->Next();
-                    continue;
-                }
-            }
-            nMoneySupply += coin.out.nValue;
+        if (pcursor->GetKey(key) && pcursor->GetValue(coin) && !coin.IsSpent())
+        {
+            nMoneySupply += !coin.out.scriptPubKey.IsUnspendable() ? coin.out.nValue : 0;
         }
         pcursor->Next();
     }

@@ -420,35 +420,19 @@ bool CMasternodeBroadcast::Sign(const CKey& key, const CPubKey& pubKey)
     std::string strError = "";
     std::string strMessage;
 
-    if(Params().GetConsensus().NetworkUpgradeActive(chainActive.Height(), Consensus::UPGRADE_STAKE_MODIFIER_V2)) {
-        nMessVersion = MessageVersion::MESS_VER_HASH;
-        strMessage = GetSignatureHash().GetHex();
+    nMessVersion = MessageVersion::MESS_VER_HASH;
+    strMessage = GetSignatureHash().GetHex();
 
-        if (!CMessageSigner::SignMessage(strMessage, vchSig, key)) {
-            return error("%s : SignMessage() (nMessVersion=%d) failed", __func__, nMessVersion);
-        }
-
-        if (!CMessageSigner::VerifyMessage(pubKey, vchSig, strMessage, strError)) {
-            return error("%s : VerifyMessage() (nMessVersion=%d) failed, error: %s\n",
-                    __func__, nMessVersion, strError);
-        }
-
-        return true;
-    } else {
-        nMessVersion = MessageVersion::MESS_VER_STRMESS;
-        strMessage = GetOldStrMessage();
-
-        CHashWriter ss(SER_GETHASH, 0);
-        ss << strMessageMagic;
-        ss << strMessage;
-
-        if (!key.SignCompact(ss.GetHash(), vchSig)) {
-            return error("%s : VerifyMessage() (nMessVersion=%d) failed, error: Signing failed.\n",
-                    __func__, nMessVersion);
-        }
-
-        return true;
+    if (!CMessageSigner::SignMessage(strMessage, vchSig, key)) {
+        return error("%s : SignMessage() (nMessVersion=%d) failed", __func__, nMessVersion);
     }
+
+    if (!CMessageSigner::VerifyMessage(pubKey, vchSig, strMessage, strError)) {
+        return error("%s : VerifyMessage() (nMessVersion=%d) failed, error: %s\n",
+                __func__, nMessVersion, strError);
+    }
+
+    return true;
 }
 
 bool CMasternodeBroadcast::Sign(const std::string strSignKey)
@@ -544,8 +528,7 @@ bool CMasternodeBroadcast::CheckAndUpdate(int& nDos)
     std::string strError = "";
     if (!CheckSignature())
     {
-        // masternodes older than this proto version use old strMessage format for mnannounce
-        nDos = protocolVersion <= MIN_PEER_MNANNOUNCE ? 0 : 100;
+        nDos = 100;
         return error("%s : Got bad Masternode address signature", __func__);
     }
 

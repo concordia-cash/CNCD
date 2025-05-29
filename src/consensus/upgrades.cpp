@@ -24,40 +24,6 @@ const struct NUInfo NetworkUpgradeInfo[Consensus::MAX_NETWORK_UPGRADES] = {
                 /*.strInfo =*/ "Proof of Stake Consensus activation",
         },
         {
-                /*.strName =*/ "PoS_v2",
-                /*.strInfo =*/ "New selection for stake modifier",
-        },
-
-        {
-                /*.strName =*/ "BIP65",
-                /*.strInfo =*/ "CLTV (BIP65) activation - start block v5",
-        },
-
-        {
-                /*.strName =*/ "stake_modifier_v2",
-                /*.strInfo =*/ "new 256-bit stake modifier - start block v6",
-        },
-        {
-                /*.strName =*/ "time_protocol_v2",
-                /*.strInfo =*/ "new message sigs - start block v7 - time protocol - zc spend v4",
-        },
-        {
-                /*.strName =*/ "p2pkh_block_signatures",
-                /*.strInfo =*/ "activation of p2pkh block signatures",
-        },
-        {
-                /*.strName =*/ "Stake_min_depth_v2",
-                /*.strInfo =*/ "Increases the stake min depth",
-        },
-        {
-                /*.strName =*/ "dynamic_rewards",
-                /*.strInfo =*/ "dynamic reward system",
-        },
-        {
-                /*.strName =*/ "dynamic_collaterals",
-                /*.strInfo =*/ "dynamic collateral system",
-        },
-        {
                 /*.strName =*/ "Test_dummy",
                 /*.strInfo =*/ "Test dummy info",
         },

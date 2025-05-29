@@ -1667,10 +1667,7 @@ CAmount CWallet::GetStakingBalance() const
     const auto nHeight = chainActive.Height();
     const auto& params = Params();
     const auto& consensus = params.GetConsensus();
-    const auto nStakeMinDepth = 
-        consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MIN_DEPTH_V2) ?
-        consensus.nStakeMinDepthV2 : 
-        consensus.nStakeMinDepth;
+    const auto nStakeMinDepth = consensus.nStakeMinDepth;
  
     return 
         std::max(
@@ -1893,10 +1890,7 @@ bool CWallet::AvailableCoins(std::vector<COutput>* pCoins,      // --> populates
     const auto& params = Params();
     const auto& consensus = params.GetConsensus();
     const auto nHeight = chainActive.Height();
-    const auto nStakeMinDepth = 
-        consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_STAKE_MIN_DEPTH_V2) ?
-        consensus.nStakeMinDepthV2 : 
-        consensus.nStakeMinDepth;
+    const auto nStakeMinDepth = consensus.nStakeMinDepth;
 
     LOCK2(cs_main, cs_wallet);
 
@@ -2538,9 +2532,6 @@ bool CWallet::CreateCoinStake(
     pStakerStatus->SetLastTip(pindexPrev);
     pStakerStatus->SetLastCoins((int) availableCoins->size());
 
-    // P2PKH block signatures were not accepted before v5 update.
-    bool onlyP2PK = !consensus.NetworkUpgradeActive(pindexPrev->nHeight + 1, Consensus::UPGRADE_P2PKH_BLOCK_SIGNATURES);
-
     // Kernel Search
     CAmount nCredit;
     CScript scriptPubKeyKernel;
@@ -2584,7 +2575,7 @@ bool CWallet::CreateCoinStake(
 
         // Create the output transaction(s)
         std::vector<CTxOut> vout;
-        if (!stakeInput.CreateTxOuts(this, vout, nCredit - nMasternodeCredit, onlyP2PK)) {
+        if (!stakeInput.CreateTxOuts(this, vout, nCredit - nMasternodeCredit)) {
             LogPrintf("%s : failed to create output\n", __func__);
             continue;
         }

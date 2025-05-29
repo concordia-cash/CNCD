@@ -10,7 +10,6 @@
 #include "kernel.h"
 
 #include "db.h"
-#include "legacy/stakemodifier.h"
 #include "script/interpreter.h"
 #include "util.h"
 #include "policy/policy.h"
@@ -34,16 +33,7 @@ CStakeKernel::CStakeKernel(const CBlockIndex* const pindexPrev, CStakeInput* sta
     stakeValue(stakeInput->GetValue())
 {
     // Set kernel stake modifier
-    if (!Params().GetConsensus().NetworkUpgradeActive(pindexPrev->nHeight + 1, Consensus::UPGRADE_STAKE_MODIFIER_V2)) {
-        uint64_t nStakeModifier = 0;
-        if (!GetOldStakeModifier(stakeInput, nStakeModifier))
-            LogPrintf("%s : ERROR: Failed to get kernel stake modifier\n", __func__);
-        // Modifier v1
-        stakeModifier << nStakeModifier;
-    } else {
-        // Modifier v2
-        stakeModifier << pindexPrev->GetStakeModifierV2();
-    }
+    stakeModifier << pindexPrev->GetStakeModifier();
     CBlockIndex* pindexFrom = stakeInput->GetIndexFrom();
     nTimeBlockFrom = pindexFrom->nTime;
 }
@@ -127,14 +117,12 @@ bool Stake(const CBlockIndex* pindexPrev, CStakeInput* stakeInput, unsigned int 
     const int nHeightTx = pindexPrev->nHeight + 1;
 
     // Get the new time slot (and verify it's not the same as previous block)
-    const bool fRegTest = Params().IsRegTestNet();
-    const bool fTimeProtocolV2 = Params().GetConsensus().IsTimeProtocolV2(nHeightTx) && !fRegTest;
     const int nTimeSlotLength = Params().GetConsensus().nTimeSlotLength;
-    nTimeTx = fTimeProtocolV2 ? pindexPrev->MinPastBlockTime() : GetAdjustedTime();
+    nTimeTx = pindexPrev->MinPastBlockTime();
 
     if (!stakeInput || !stakeInput->ContextCheck(nHeightTx, nTimeTx)) return false;
 
-    int slotStep = fTimeProtocolV2 ? nTimeSlotLength : 1;
+    int slotStep = nTimeSlotLength;
 
     nTimeTx = (nTimeTx / slotStep) * slotStep;
 
@@ -142,7 +130,7 @@ bool Stake(const CBlockIndex* pindexPrev, CStakeInput* stakeInput, unsigned int 
         nTimeTx += slotStep;
     }
 
-    while(nTimeTx <= (fTimeProtocolV2 ? pindexPrev->MaxFutureBlockTime() : pindexPrev->GetBlockTime() + HASH_DRIFT)) {
+    while(nTimeTx <= pindexPrev->MaxFutureBlockTime()) {
         // Verify Proof Of Stake
         CStakeKernel stakeKernel(pindexPrev, stakeInput, nBits, nTimeTx);
         if(stakeKernel.CheckKernelHash(true)) return true;

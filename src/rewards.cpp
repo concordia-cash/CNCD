@@ -139,12 +139,11 @@ bool CRewards::Init()
             }
 
             if(ok) { // Fill any gap that could exist using the blockchain files
-                const auto nFeatureStartHeight = consensus.vUpgrades[Consensus::UPGRADE_DYNAMIC_REWARDS].nActivationHeight;
                 const auto nCurrentHeight = chainActive.Height();
                 const auto nRewardAdjustmentInterval = consensus.nRewardAdjustmentInterval;
 
                 for(
-                    int nEpochHeight = GetDynamicRewardsEpochHeight(nFeatureStartHeight) + nRewardAdjustmentInterval; 
+                    int nEpochHeight = nRewardAdjustmentInterval; 
                     nEpochHeight <= nCurrentHeight; 
                     nEpochHeight += nRewardAdjustmentInterval
                 ) {
@@ -258,150 +257,135 @@ bool CRewards::ConnectBlock(const CBlockIndex* pindex, CAmount nSubsidy)
     std::ostringstream oss;
     auto ok = true;
 
-    if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_DYNAMIC_REWARDS))
+    CAmount nNewSubsidy = 0;
+
+    if (IsDynamicRewardsEpochHeight(nHeight)) 
     {
-        CAmount nNewSubsidy = 0;
+        auto nBlocksPerDay = DAY_IN_SECONDS / consensus.nTargetSpacing;
+        auto nBlocksPerWeek = WEEK_IN_SECONDS / consensus.nTargetSpacing;
+        auto nBlocksPerMonth = MONTH_IN_SECONDS / consensus.nTargetSpacing;
 
-        if (IsDynamicRewardsEpochHeight(nHeight)) 
-        {
-            auto nBlocksPerDay = DAY_IN_SECONDS / consensus.nTargetSpacing;
-            auto nBlocksPerWeek = WEEK_IN_SECONDS / consensus.nTargetSpacing;
-            auto nBlocksPerMonth = MONTH_IN_SECONDS / consensus.nTargetSpacing;
+        // get total money supply
+        const auto nMoneySupply = pindex->nMoneySupply.get();
+        oss << "nMoneySupply: " << FormatMoney(nMoneySupply) << std::endl;
 
-            // get total money supply
-            const auto nMoneySupply = pindex->nMoneySupply.get();
-            oss << "nMoneySupply: " << FormatMoney(nMoneySupply) << std::endl;
+        // get the current masternode collateral, and the next week collateral
+        auto nCollateralAmount = CMasternode::GetMasternodeNodeCollateral(nHeight);
+        auto nNextWeekCollateralAmount = CMasternode::GetMasternodeNodeCollateral(nHeight + nBlocksPerWeek);
 
-            // get the current masternode collateral, and the next week collateral
-            auto nCollateralAmount = CMasternode::GetMasternodeNodeCollateral(nHeight);
-            auto nNextWeekCollateralAmount = CMasternode::GetMasternodeNodeCollateral(nHeight + nBlocksPerWeek);
+        // calculate the current circulating supply
+        CAmount nCirculatingSupply = 0;
+        FlushStateToDisk();
+        std::unique_ptr<CCoinsViewCursor> pcursor(pcoinsTip->Cursor());
 
-            // calculate the current circulating supply
-            CAmount nCirculatingSupply = 0;
-            FlushStateToDisk();
-            std::unique_ptr<CCoinsViewCursor> pcursor(pcoinsTip->Cursor());
-
-            while (pcursor->Valid()) {
-                COutPoint key;
-                Coin coin;
-                if (pcursor->GetKey(key) && pcursor->GetValue(coin) && !coin.IsSpent()) {
-                    // ----------- burn address scanning -----------
-                    CTxDestination source;
-                    if (ExtractDestination(coin.out.scriptPubKey, source)) {
-                        const std::string addr = EncodeDestination(source);
-                        if (consensus.mBurnAddresses.find(addr) != consensus.mBurnAddresses.end() &&
-                            consensus.mBurnAddresses.at(addr) < nHeight
-                        ) {
-                            pcursor->Next(); // Skip
-                            continue;
-                        }
-                    }
-
-                    // ----------- masternode collaterals scanning ----------- 
-                    if(
-                        coin.out.nValue == nCollateralAmount || 
-                        coin.out.nValue == nNextWeekCollateralAmount
-                    ) {
-                        pcursor->Next(); // Skip
-                        continue;
-                    }
-
-                    // ----------- UTXOs age related scanning -----------
-                    auto nBlocksDiff = static_cast<int64_t>(nHeight - coin.nHeight);
-                    const auto nMultiplier = 100000000LL;
-
-                    // y = mx + b 
-                    // 3 months old or less => 100%
-                    // 12 months old or greater => 0%
-                    const auto nSupplyWeightRatio = 
-                        std::min(
-                            std::max(
-                                (100LL * nMultiplier - (((100LL * nMultiplier)/(9LL * nBlocksPerMonth)) * (nBlocksDiff - 3LL * nBlocksPerMonth))) / nMultiplier, 
-                            0LL), 
-                        100LL);
-
-                    nCirculatingSupply += coin.out.nValue * nSupplyWeightRatio / 100LL;
+        while (pcursor->Valid()) {
+            COutPoint key;
+            Coin coin;
+            if (pcursor->GetKey(key) && pcursor->GetValue(coin) && !coin.IsSpent()) {
+                // ----------- masternode collaterals scanning ----------- 
+                if(
+                    coin.out.nValue == nCollateralAmount || 
+                    coin.out.nValue == nNextWeekCollateralAmount
+                ) {
+                    pcursor->Next(); // Skip
+                    continue;
                 }
 
-                pcursor->Next();
+                // ----------- UTXOs age related scanning -----------
+                auto nBlocksDiff = static_cast<int64_t>(nHeight - coin.nHeight);
+                const auto nMultiplier = 100000000LL;
+
+                // y = mx + b 
+                // 3 months old or less => 100%
+                // 12 months old or greater => 0%
+                const auto nSupplyWeightRatio = 
+                    std::min(
+                        std::max(
+                            (100LL * nMultiplier - (((100LL * nMultiplier)/(9LL * nBlocksPerMonth)) * (nBlocksDiff - 3LL * nBlocksPerMonth))) / nMultiplier, 
+                        0LL), 
+                    100LL);
+
+                nCirculatingSupply += coin.out.nValue * nSupplyWeightRatio / 100LL;
             }
-            oss << "nCirculatingSupply: " << FormatMoney(nCirculatingSupply) << std::endl;
 
-            // calculate the epoch's average staking power
-            const auto nRewardAdjustmentInterval = consensus.nRewardAdjustmentInterval;
-            oss << "nRewardAdjustmentInterval: " << nRewardAdjustmentInterval << std::endl;
-            const auto nTimeSlotLength = consensus.TimeSlotLength(nHeight);
-            oss << "nTimeSlotLength: " << nTimeSlotLength << std::endl;
-            const auto endBlock = chainActive.Tip();
-            const auto startBlock = chainActive[endBlock->nHeight - std::min(nRewardAdjustmentInterval, endBlock->nHeight)];
-            const auto nTimeDiff = endBlock->GetBlockTime() - startBlock->GetBlockTime();
-            const auto nWorkDiff = endBlock->nChainWork - startBlock->nChainWork;
-            const auto nNetworkHashPS = static_cast<int64_t>(nWorkDiff.getdouble() / nTimeDiff);
-            oss << "nNetworkHashPS: " << nNetworkHashPS << std::endl;
-            const auto nStakedCoins = static_cast<CAmount>(nNetworkHashPS * nTimeSlotLength * 100);
-            oss << "nStakedCoins: " << FormatMoney(nStakedCoins) << std::endl;
-
-            // Remove the staked supply from circulating supply
-            nCirculatingSupply = std::max(nCirculatingSupply - nStakedCoins, CAmount(0));
-            oss << "nCirculatingSupply without staked coins: " << FormatMoney(nCirculatingSupply) << std::endl;
-
-            // calculate target emissions
-            const auto nTotalEmissionRate = TOT_SPLY_TRGT_EMISSION;
-            oss << "nTotalEmissionRate: " << nTotalEmissionRate << std::endl;
-            const auto nCirculatingEmissionRate = CIRC_SPLY_TRGT_EMISSION;
-            oss << "nCirculatingEmissionRate: " << nCirculatingEmissionRate << std::endl;
-            const auto nActualEmission = nSubsidy * nRewardAdjustmentInterval;
-            oss << "nActualEmission: " << FormatMoney(nActualEmission) << std::endl;
-            const auto nSupplyTargetEmission = ((nMoneySupply / (365LL * nBlocksPerDay)) / 1000000) * nTotalEmissionRate * nRewardAdjustmentInterval;
-            oss << "nSupplyTargetEmission: " << FormatMoney(nSupplyTargetEmission) << std::endl;
-            const auto nCirculatingTargetEmission = ((nCirculatingSupply / (365LL * nBlocksPerDay)) / 1000000) * nCirculatingEmissionRate * nRewardAdjustmentInterval;
-            oss << "nCirculatingTargetEmission: " << FormatMoney(nCirculatingTargetEmission) << std::endl;
-            const auto nTargetEmission = (nSupplyTargetEmission + nCirculatingTargetEmission) / 2LL;
-            oss << "nTargetEmission: " << FormatMoney(nTargetEmission) << std::endl;
-
-            // calculate required delta values
-            const auto nDelta = (nActualEmission - nTargetEmission) / nRewardAdjustmentInterval;
-            oss << "nDelta: " << FormatMoney(nDelta) << std::endl;
-            
-            // y = mx + b
-            // <= 0% |ratio| => 1%
-            // >= 100% |ratio| => 10%
-            
-            const auto nRatio = std::llabs((nDelta * 100) / nSubsidy); // percentage of the difference on emissions and the current reward 
-            oss << "nRatio: " << nRatio << std::endl;
-
-            const auto nWeightRatio = ((std::min(nRatio, 100LL) * 9LL) / 100LL) + 1LL;
-
-            const auto nDampedDelta = nDelta * nWeightRatio / 100LL;
-            oss << "nDampedDelta: " << FormatMoney(nDampedDelta) << std::endl;
-
-            // adjust the reward for this epoch
-            nNewSubsidy = nSubsidy - nDampedDelta;
-            // removes decimal places
-            nNewSubsidy = (nNewSubsidy / COIN) * COIN;
-
-            oss << "Adjustment at height " << nHeight << ": " << FormatMoney(nSubsidy) << " => " << FormatMoney(nNewSubsidy) << std::endl;
+            pcursor->Next();
         }
+        oss << "nCirculatingSupply: " << FormatMoney(nCirculatingSupply) << std::endl;
 
-        if ( // just in case, if there is no data get the reward value from the blocks of the epoch
-            nHeight != nEpochHeight && 
-            mDynamicRewards.find(nEpochHeight) == mDynamicRewards.end()
-        ) {
-            nNewSubsidy = nSubsidy;
+        // calculate the epoch's average staking power
+        const auto nRewardAdjustmentInterval = consensus.nRewardAdjustmentInterval;
+        oss << "nRewardAdjustmentInterval: " << nRewardAdjustmentInterval << std::endl;
+        const auto nTimeSlotLength = consensus.nTimeSlotLength;
+        oss << "nTimeSlotLength: " << nTimeSlotLength << std::endl;
+        const auto endBlock = chainActive.Tip();
+        const auto startBlock = chainActive[endBlock->nHeight - std::min(nRewardAdjustmentInterval, endBlock->nHeight)];
+        const auto nTimeDiff = endBlock->GetBlockTime() - startBlock->GetBlockTime();
+        const auto nWorkDiff = endBlock->nChainWork - startBlock->nChainWork;
+        const auto nNetworkHashPS = static_cast<int64_t>(nWorkDiff.getdouble() / nTimeDiff);
+        oss << "nNetworkHashPS: " << nNetworkHashPS << std::endl;
+        const auto nStakedCoins = static_cast<CAmount>(nNetworkHashPS * nTimeSlotLength * 100);
+        oss << "nStakedCoins: " << FormatMoney(nStakedCoins) << std::endl;
+
+        // Remove the staked supply from circulating supply
+        nCirculatingSupply = std::max(nCirculatingSupply - nStakedCoins, CAmount(0));
+        oss << "nCirculatingSupply without staked coins: " << FormatMoney(nCirculatingSupply) << std::endl;
+
+        // calculate target emissions
+        const auto nTotalEmissionRate = TOT_SPLY_TRGT_EMISSION;
+        oss << "nTotalEmissionRate: " << nTotalEmissionRate << std::endl;
+        const auto nCirculatingEmissionRate = CIRC_SPLY_TRGT_EMISSION;
+        oss << "nCirculatingEmissionRate: " << nCirculatingEmissionRate << std::endl;
+        const auto nActualEmission = nSubsidy * nRewardAdjustmentInterval;
+        oss << "nActualEmission: " << FormatMoney(nActualEmission) << std::endl;
+        const auto nSupplyTargetEmission = ((nMoneySupply / (365LL * nBlocksPerDay)) / 1000000) * nTotalEmissionRate * nRewardAdjustmentInterval;
+        oss << "nSupplyTargetEmission: " << FormatMoney(nSupplyTargetEmission) << std::endl;
+        const auto nCirculatingTargetEmission = ((nCirculatingSupply / (365LL * nBlocksPerDay)) / 1000000) * nCirculatingEmissionRate * nRewardAdjustmentInterval;
+        oss << "nCirculatingTargetEmission: " << FormatMoney(nCirculatingTargetEmission) << std::endl;
+        const auto nTargetEmission = (nSupplyTargetEmission + nCirculatingTargetEmission) / 2LL;
+        oss << "nTargetEmission: " << FormatMoney(nTargetEmission) << std::endl;
+
+        // calculate required delta values
+        const auto nDelta = (nActualEmission - nTargetEmission) / nRewardAdjustmentInterval;
+        oss << "nDelta: " << FormatMoney(nDelta) << std::endl;
+        
+        // y = mx + b
+        // <= 0% |ratio| => 1%
+        // >= 100% |ratio| => 10%
+        
+        const auto nRatio = std::llabs((nDelta * 100) / nSubsidy); // percentage of the difference on emissions and the current reward 
+        oss << "nRatio: " << nRatio << std::endl;
+
+        const auto nWeightRatio = ((std::min(nRatio, 100LL) * 9LL) / 100LL) + 1LL;
+
+        const auto nDampedDelta = nDelta * nWeightRatio / 100LL;
+        oss << "nDampedDelta: " << FormatMoney(nDampedDelta) << std::endl;
+
+        // adjust the reward for this epoch
+        nNewSubsidy = nSubsidy - nDampedDelta;
+        // removes decimal places
+        nNewSubsidy = (nNewSubsidy / COIN) * COIN;
+
+        oss << "Adjustment at height " << nHeight << ": " << FormatMoney(nSubsidy) << " => " << FormatMoney(nNewSubsidy) << std::endl;
+    }
+
+    if ( // just in case, if there is no data get the reward value from the blocks of the epoch
+        nHeight != nEpochHeight && 
+        mDynamicRewards.find(nEpochHeight) == mDynamicRewards.end()
+    ) {
+        nNewSubsidy = nSubsidy;
+    }
+
+    if(ok && nNewSubsidy > 0) { // store it
+        mDynamicRewards[nEpochHeight] = nNewSubsidy; // on the in-memory map
+
+        sqlite3_bind_int(insertStmt, 1, nEpochHeight); // on the file database
+        sqlite3_bind_int64(insertStmt, 2, nNewSubsidy);
+        auto rc = sqlite3_step(insertStmt);
+        if (rc != SQLITE_DONE) {
+            oss << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+            ok = false;
         }
-
-        if(ok && nNewSubsidy > 0) { // store it
-            mDynamicRewards[nEpochHeight] = nNewSubsidy; // on the in-memory map
-
-            sqlite3_bind_int(insertStmt, 1, nEpochHeight); // on the file database
-            sqlite3_bind_int64(insertStmt, 2, nNewSubsidy);
-            auto rc = sqlite3_step(insertStmt);
-            if (rc != SQLITE_DONE) {
-                oss << "SQL error: " << sqlite3_errmsg(db) << std::endl;
-                ok = false;
-            }
-            sqlite3_reset(insertStmt);
-        }
+        sqlite3_reset(insertStmt);
     }
 
     std::string log = oss.str();
@@ -425,8 +409,7 @@ bool CRewards::DisconnectBlock(const CBlockIndex* pindex)
     
     try
     {
-        if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_DYNAMIC_REWARDS) &&
-            IsDynamicRewardsEpochHeight(nHeight)
+        if (IsDynamicRewardsEpochHeight(nHeight)
         ) {
             auto it = mDynamicRewards.find(nHeight);
             if (it != mDynamicRewards.end()) {
@@ -466,16 +449,8 @@ CAmount GetBlockSubsidy(int nHeight)
     CAmount nSubsidy;
     // ---- Static reward table ----
     if (nHeight == 1) {
-        nSubsidy = 30000000 * COIN;
-    } else if (nHeight <= 100000) {
-        nSubsidy = 100 * COIN;
-    } else if (nHeight > 100000 && nHeight <= 200000) {
-        nSubsidy = 125 * COIN;
-    } else if (nHeight > 200000 && nHeight <= 300000) {
-        nSubsidy = 150 * COIN;
-    } else if (nHeight > 300000 && nHeight <= 400000) {
-        nSubsidy = 125 * COIN;
-    } else if (nHeight > 400000) {
+        nSubsidy = 100000000 * COIN;
+    } else {
         nSubsidy = 100 * COIN;
     }
     // ---- Static reward table ----
@@ -489,18 +464,16 @@ CAmount CRewards::GetBlockValue(int nHeight)
 
     CAmount nSubsidy = GetBlockSubsidy(nHeight);
 
-    if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_DYNAMIC_REWARDS)) {
-        // if this is the block where calculations are made on ConnectBlock
-        // return the reward value from the previous block
-        if(IsDynamicRewardsEpochHeight(nHeight)) 
-            return GetBlockValue(nHeight - 1);
+    // if this is the block where calculations are made on ConnectBlock
+    // return the reward value from the previous block
+    if(IsDynamicRewardsEpochHeight(nHeight)) 
+        return GetBlockValue(nHeight - 1);
 
-        // find and return the dynamic reward
-        const auto nEpochHeight = GetDynamicRewardsEpochHeight(nHeight);
-        auto it = mDynamicRewards.find(nEpochHeight);
-        if (it != mDynamicRewards.end()) {
-            return std::min(nSubsidy, it->second);
-        }
+    // find and return the dynamic reward
+    const auto nEpochHeight = GetDynamicRewardsEpochHeight(nHeight);
+    auto it = mDynamicRewards.find(nEpochHeight);
+    if (it != mDynamicRewards.end()) {
+        return std::min(nSubsidy, it->second);
     }
 
     // fallback non-dynamic reward return
@@ -526,8 +499,8 @@ CBlockchainStatus::getblockchainstatus()
 
     // Fetch consensus parameters
     const auto nTargetSpacing = consensus.nTargetSpacing;
-    const auto nTargetTimespan = consensus.TargetTimespan(nHeight);
-    const auto nTimeSlotLength = consensus.TimeSlotLength(nHeight);
+    const auto nTargetTimespan = consensus.nTargetTimespan;
+    const auto nTimeSlotLength = consensus.nTimeSlotLength;
 
     // Fetch reward details
     nMoneySupplyThisBlock = pTip->nMoneySupply.get();

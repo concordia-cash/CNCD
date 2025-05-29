@@ -27,15 +27,6 @@ namespace Consensus {
 enum UpgradeIndex : uint32_t {
     BASE_NETWORK,
     UPGRADE_POS,
-    UPGRADE_POS_V2,
-    UPGRADE_BIP65,
-    UPGRADE_STAKE_MODIFIER_V2,
-    UPGRADE_TIME_PROTOCOL_V2,
-    UPGRADE_P2PKH_BLOCK_SIGNATURES,
-    UPGRADE_STAKE_MIN_DEPTH_V2,
-    UPGRADE_DYNAMIC_REWARDS,
-    UPGRADE_DYNAMIC_COLLATERALS,
-    UPGRADE_POS_V3,
     // NOTE: Also add new upgrades to NetworkUpgradeInfo in upgrades.cpp
     UPGRADE_TESTDUMMY,
     MAX_NETWORK_UPGRADES,
@@ -90,78 +81,40 @@ struct Params {
     uint256 hashGenesisBlock;
     bool fPowAllowMinDifficultyBlocks;
     uint256 powLimit;
-    uint256 posLimitV1;
-    uint256 posLimitV2;
     int nCoinbaseMaturity;
     int nFutureTimeDriftPoW;
     int nFutureTimeDriftPoS;
     CAmount nMaxMoneyOut;
-    int nPoolMaxTransactions;
-    int nStakeMinAge;
     int nStakeMinDepth;
-    int nStakeMinDepthV2;
     int64_t nTargetTimespan;
-    int64_t nTargetTimespanV2;
     int64_t nTargetSpacing;
     int nTimeSlotLength;
-
     int nRewardAdjustmentInterval;
-
-    // burn addresses
-    std::map<std::string, int> mBurnAddresses = {};
 
     // spork keys
     std::string strSporkPubKey;
-    std::string strSporkPubKeyOld;
-    int64_t nTime_EnforceNewSporkKey;
-    int64_t nTime_RejectOldSporkKey;
 
     // Map with network updates
     NetworkUpgrade vUpgrades[MAX_NETWORK_UPGRADES];
 
-    int64_t TargetTimespan(const int nHeight) const { return IsTimeProtocolV2(nHeight) ? nTargetTimespanV2 : nTargetTimespan; }
-    int64_t TargetTimespan(const bool fV2 = true) const { return fV2 ? nTargetTimespanV2 : nTargetTimespan; }
-    uint256 ProofOfStakeLimit(const bool fV2) const { return fV2 ? posLimitV2 : posLimitV1; }
     bool MoneyRange(const CAmount& nValue) const { return (nValue >= 0 && nValue <= nMaxMoneyOut); }
-    bool IsTimeProtocolV2(const int nHeight) const { return NetworkUpgradeActive(nHeight, UPGRADE_TIME_PROTOCOL_V2); }
-    int TimeSlotLength(const int nHeight) const { return IsTimeProtocolV2(nHeight) ? nTimeSlotLength : 1; }
 
     int FutureBlockTimeDrift(const int nHeight) const
     {
-        // PoS (TimeV2): 14 seconds
-        if (IsTimeProtocolV2(nHeight)) return nTimeSlotLength - 1;
-        // PoS (TimeV1): 3 minutes - PoW: 2 hours
+        // PoS: 14 seconds
+        // PoW: 2 hours
         return (NetworkUpgradeActive(nHeight, UPGRADE_POS) ? nFutureTimeDriftPoS : nFutureTimeDriftPoW);
     }
 
     bool IsValidBlockTimeStamp(const int64_t nTime, const int nHeight) const
     {
-        // Before time protocol V2, blocks can have arbitrary timestamps
-        if (!IsTimeProtocolV2(nHeight)) return true;
-        // Time protocol v2 requires time in slots
-        return (nTime % nTimeSlotLength) == 0;
+        return (NetworkUpgradeActive(nHeight, UPGRADE_POS) ? (nTime % nTimeSlotLength) == 0 : true);
     }
 
-    bool HasStakeMinAgeOrDepth(const int contextHeight, const uint32_t contextTime,
-            const int utxoFromBlockHeight, const uint32_t utxoFromBlockTime) const
+    bool HasStakeMinAgeOrDepth(const int contextHeight, const int utxoFromBlockHeight) const
     {
-        // before stake modifier V2, we require the utxo to be nStakeMinAge old
-        if (!NetworkUpgradeActive(contextHeight, Consensus::UPGRADE_STAKE_MODIFIER_V2))
-            return (utxoFromBlockTime + nStakeMinAge <= contextTime);
-        // with stake modifier V2+, we require the utxo to be nStakeMinDepth deep in the chain
-        return (
-            contextHeight - utxoFromBlockHeight 
-                >= 
-            NetworkUpgradeActive(contextHeight, Consensus::UPGRADE_STAKE_MIN_DEPTH_V2) ? 
-                nStakeMinDepthV2 : nStakeMinDepth
-        );
-    }
-
-    bool IsBurnAddress(const std::string strAddress, const int nHeight) 
-    {
-        return 
-            mBurnAddresses.find(strAddress) != mBurnAddresses.end() &&
-            mBurnAddresses[strAddress] < nHeight;
+        // We require the utxo to be nStakeMinDepth deep in the chain
+        return contextHeight - utxoFromBlockHeight >= nStakeMinDepth;
     }
 
     /**
