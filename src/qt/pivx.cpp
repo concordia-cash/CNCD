@@ -560,21 +560,6 @@ int main(int argc, char* argv[])
     BitcoinApplication app(argc, argv);
 
     // Custom fonts.
-    QFontDatabase::addApplicationFont(":/font/Nunito-Black.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-BlackItalic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-Bold.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-BoldItalic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-ExtraBold.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-ExtraBoldItalic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-ExtraLight.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-ExtraLightItalic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-Italic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-Light.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-LightItalic.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-Regular.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-SemiBold.ttf");
-    QFontDatabase::addApplicationFont(":/font/Nunito-SemiBoldItalic.ttf");
-
     QFontDatabase::addApplicationFont(":/font/Montserrat-Black.ttf");
     QFontDatabase::addApplicationFont(":/font/Montserrat-BlackItalic.ttf");
     QFontDatabase::addApplicationFont(":/font/Montserrat-Bold.ttf");

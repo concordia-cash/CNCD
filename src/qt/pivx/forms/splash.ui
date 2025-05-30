@@ -154,7 +154,7 @@
 											height: 11px;
 											width: 91px;
 											color: #828282;
-											font-family: Nunito;
+											font-family: Montserrat;
 											font-size: 9px;
 											letter-spacing: 1.04px;
 											line-height: 12px;
@@ -265,7 +265,7 @@
 										height: 16px;
 										width: 85px;
 										color: #FFFFFF;
-										font-family: Nunito;
+										font-family: Montserrat;
 										font-size: 12px;
 										letter-spacing: 0.2px;
 										line-height: 16px;
