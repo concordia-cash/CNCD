@@ -124,6 +124,7 @@ TopBar::TopBar(PIVXGUI* _mainWindow, QWidget* parent) : PWidget(_mainWindow, par
         ui->pushButtonTheme->setButtonClassStyle("cssClass", "btn-check-theme-dark");
         ui->pushButtonTheme->setButtonText(tr("Dark Theme"));
     }
+    ui->pushButtonTheme->setVisible(false);
 
     setCssProperty(ui->qrContainer, "container-qr");
     setCssProperty(ui->pushButtonQR, "btn-qr");
