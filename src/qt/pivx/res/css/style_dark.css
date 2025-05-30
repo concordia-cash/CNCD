@@ -66,7 +66,7 @@ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH*/
 }
 
 QPushButton[cssClass="img-nav-logo"] {
-  qproperty-icon: url("://img-nav-logo-png");
+  qproperty-icon: url("://img-nav-logo");
 }
 
 *[cssClass="btn-nav-receive"] {
