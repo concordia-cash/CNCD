@@ -496,7 +496,6 @@ void BitcoinApplication::initializeResult(int retval)
             window->show();
         }
 
-        sleep(30);
         Q_EMIT splashFinished(window);
 
 #ifdef ENABLE_WALLET
