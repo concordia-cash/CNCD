@@ -1223,11 +1223,11 @@ QPushButton[cssClass="btn-check"]:unchecked {
 }
 
 QPushButton[cssClass="btn-primary"] {
-  border: 1px solid #fefefe;
-  background-color: #fefefe;
+  border: 1px solid #2a80B9;
+  background-color: #2a80B9;
   font-size: 18px;
   padding: 4px 10px;
-  color: #ffffff;
+  color: #fefefe;
   border-radius: 2px;
 }
 
@@ -1236,7 +1236,7 @@ QPushButton[cssClass="btn-primary"]:hover {
   background-color: #4b5563;
   font-size: 18px;
   padding: 4px 10px;
-  color: #ffffff;
+  color: #fefefe;
   border-radius: 2px;
 }
 
@@ -1245,7 +1245,7 @@ QPushButton[cssClass="btn-primary"]:pressed {
   background-color: #4b5563;
   font-size: 18px;
   padding: 4px 10px;
-  color: #ffffff;
+  color: #fefefe;
   border-radius: 2px;
 }
 
