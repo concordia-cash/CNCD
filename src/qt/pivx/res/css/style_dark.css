@@ -70,7 +70,7 @@ QPushButton[cssClass="img-nav-logo"] {
 }
 
 *[cssClass="btn-nav-receive"] {
-  qproperty-icon: url("://ic-nav-receive") off, url("://ic-nav-receive-active") on;
+  qproperty-icon: url("://ic-nav-receive");
   qproperty-iconSize: 24px 40px;
   background-color: transparent;
   font-size: 12px;
@@ -96,7 +96,7 @@ QPushButton[cssClass="img-nav-logo"] {
 }
 
 *[cssClass="btn-nav-receive-active"] {
-  qproperty-icon: url("://ic-nav-receive-active");
+  qproperty-icon: url("://ic-nav-receive");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -132,7 +132,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-settings"] {
-  qproperty-icon: url("://ic-nav-settings") off, url("://ic-nav-settings-active") on;
+  qproperty-icon: url("://ic-nav-settings");
   qproperty-iconSize: 24px 40px;
   background-color: transparent;
   font-size: 12px;
@@ -152,7 +152,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-settings"]:hover {
-  qproperty-icon: url("://ic-nav-settings-hover");
+  qproperty-icon: url("://ic-nav-settings");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -160,7 +160,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-settings-active"] {
-  qproperty-icon: url("://ic-nav-settings-active");
+  qproperty-icon: url("://ic-nav-settings");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -240,7 +240,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-address"] {
-  qproperty-icon: url("://ic-nav-address") off, url("://ic-nav-address-active") on;
+  qproperty-icon: url("://ic-nav-address");
   qproperty-iconSize: 24px 40px;
   background-color: transparent;
   font-size: 12px;
@@ -260,7 +260,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-address"]:hover {
-  qproperty-icon: url("://ic-nav-address-hover");
+  qproperty-icon: url("://ic-nav-address");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -268,7 +268,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-address-active"] {
-  qproperty-icon: url("://ic-nav-address-active");
+  qproperty-icon: url("://ic-nav-address");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -276,7 +276,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-privacy"] {
-  qproperty-icon: url("://ic-nav-privacy") off, url("//ic-nav-privacy-active") on;
+  qproperty-icon: url("://ic-nav-privacy");
   qproperty-iconSize: 24px 40px;
   background-color: transparent;
   font-size: 12px;
@@ -296,7 +296,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-privacy"]:hover {
-  qproperty-icon: url("://ic-nav-privacy-hover");
+  qproperty-icon: url("://ic-nav-privacy");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -304,7 +304,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-privacy-active"] {
-  qproperty-icon: url("://ic-nav-privacy-active");
+  qproperty-icon: url("://ic-nav-privacy");
   qproperty-iconSize: 24px 40px;
   background-color: #004000;
   font-size: 12px;
@@ -312,7 +312,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-master"] {
-  qproperty-icon: url("://ic-nav-master") off, url("://ic-nav-master-active") on;
+  qproperty-icon: url("://ic-nav-master");
   qproperty-iconSize: 24px 30px;
   background-color: transparent;
   font-size: 12px;
@@ -320,7 +320,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-master"]:checked {
-  qproperty-icon: url("://ic-nav-master-active");
+  qproperty-icon: url("://ic-nav-master");
   background-color: #004000;
   font-size: 12px;
   color: #fefefe;
@@ -333,7 +333,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-master"]:hover {
-  qproperty-icon: url("://ic-nav-master-hover");
+  qproperty-icon: url("://ic-nav-master");
   qproperty-iconSize: 24px 30px;
   background-color: #004000;
   font-size: 12px;
@@ -341,7 +341,7 @@ QPushButton[cssClass="btn-check-console"] {
 }
 
 *[cssClass="btn-nav-master-active"] {
-  qproperty-icon: url("://ic-nav-master-active");
+  qproperty-icon: url("://ic-nav-master");
   qproperty-iconSize: 24px 30px;
   background-color: #004000;
   font-size: 12px;
