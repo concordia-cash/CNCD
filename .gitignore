@@ -8,194 +8,14 @@ reset-files.bash
 configure~
 deploy/
 
-# DSW
-src/__decenomy__
-src/__decenomy__d
-src/__decenomy__-cli
-src/__decenomy__-tx
-src/bench/bench___decenomy__
-src/test/test___decenomy__
-src/qt/test/test___decenomy__-qt
-
-# Sapphire
-src/bench/bench_sapphire
-src/sapphire-cli
-src/sapphire-tx
-src/sapphired
-src/qt/sapphire-qt
-src/test/test_sapphire
-src/qt/test/test_sapphire-qt
-
-# Kyanite
-src/bench/bench_kyanite
-src/kyanite-cli
-src/kyanite-tx
-src/kyanited
-src/qt/kyanite-qt
-src/test/test_kyanite
-src/qt/test/test_kyanite-qt
-
-# Jackpot
-src/bench/bench_jackpot
-src/jackpot-cli
-src/jackpot-tx
-src/jackpotd
-src/qt/jackpot-qt
-src/test/test_jackpot
-src/qt/test/test_jackpot-qt
-
-# Dash Diamond
-src/bench/bench_dashdiamond
-src/dashdiamond-cli
-src/dashdiamond-tx
-src/dashdiamondd
-src/qt/dashdiamond-qt
-src/test/test_dashdiamond
-src/qt/test/test_dashdiamond-qt
-
-# CryptoFlow
-src/bench/bench_cryptoflow
-src/cryptoflow-cli
-src/cryptoflow-tx
-src/cryptoflowd
-src/qt/cryptoflow-qt
-src/test/test_cryptoflow
-src/qt/test/test_cryptoflow-qt
-
-# Trittium
-src/bench/bench_trittium
-src/qt/test/test_trittium-qt
-src/qt/trittium-qt
-src/test/test_trittium
-src/trittium-cli
-src/trittium-tx
-src/trittiumd
-
-# Aezora
-src/bench/bench_aezora
-src/qt/test/test_aezora-qt
-src/qt/aezora-qt
-src/test/test_aezora
-src/aezora-cli
-src/aezora-tx
-src/aezorad
-
-# Azzure
-src/bench/bench_azzure
-src/qt/test/test_azzure-qt
-src/qt/azzure-qt
-src/test/test_azzure
-src/azzure-cli
-src/azzure-tx
-src/azzured
-
-# Beacon
-src/bench/bench_beacon
-src/qt/test/test_beacon-qt
-src/qt/beacon-qt
-src/test/test_beacon
-src/beacon-cli
-src/beacon-tx
-src/beacond
-
-# Peony
-src/bench/bench_peony
-src/qt/test/test_peony-qt
-src/qt/peony-qt
-src/test/test_peony
-src/peony-cli
-src/peony-tx
-src/peonyd
-
-# CryptoSaga
-src/bench/bench_cryptosaga
-src/qt/test/test_cryptosaga-qt
-src/qt/cryptosaga-qt
-src/test/test_cryptosaga
-src/cryptosaga-cli
-src/cryptosaga-tx
-src/cryptosagad
-
-# Monk
-src/bench/bench_monk
-src/qt/test/test_monk-qt
-src/qt/monk-qt
-src/test/test_monk
-src/monk-cli
-src/monk-tx
-src/monkd
-
-# Suvereno
-src/bench/bench_suvereno
-src/qt/test/test_suvereno-qt
-src/qt/suvereno-qt
-src/test/test_suvereno
-src/suvereno-cli
-src/suvereno-tx
-src/suverenod
-
-# Eskacoin
-src/bench/bench_eskacoin
-src/qt/test/test_eskacoin-qt
-src/qt/eskacoin-qt
-src/test/test_eskacoin
-src/eskacoin-cli
-src/eskacoin-tx
-src/eskacoind
-
-# UltraClear
-src/bench/bench_ultraclear
-src/qt/test/test_ultraclear-qt
-src/qt/ultraclear-qt
-src/test/test_ultraclear
-src/ultraclear-cli
-src/ultraclear-tx
-src/ultracleard
-
-# One World Coin
-src/bench/bench_oneworld
-src/qt/test/test_oneworld-qt
-src/qt/oneworld-qt
-src/test/test_oneworld
-src/oneworld-cli
-src/oneworld-tx
-src/oneworldd
-
-# Birake
-src/bench/bench_birake
-src/qt/test/test_birake-qt
-src/qt/birake-qt
-src/test/test_birake
-src/birake-cli
-src/birake-tx
-src/biraked
-
-# Peps Coin
-src/bench/bench_peps
-src/qt/test/test_peps-qt
-src/qt/peps-qt
-src/test/test_peps
-src/peps-cli
-src/peps-tx
-src/pepsd
-
-# Mobility Coin
-src/bench/bench_mobic
-src/qt/test/test_mobic-qt
-src/qt/mobic-qt
-src/test/test_mobic
-src/mobic-cli
-src/mobic-tx
-src/mobicd
-
-# Flits
-src/bench/bench_flits
-src/qt/test/test_flits-qt
-src/qt/flits-qt
-src/test/test_flits
-src/flits-cli
-src/flits-tx
-src/flitsd
+# Concordia binaries
+src/concordia
+src/concordiad
+src/concordia-cli
+src/concordia-tx
+src/bench/bench_concordia
+src/test/test_concordia
+src/qt/test/test_concordia-qt
 
 ##########################################
 # clear this section when it's fixed
@@ -257,7 +77,7 @@ src/qt/test/moc*.cpp
 *.o-*
 *.patch
 .pivx
-.__decenomy__
+.concordia
 *.a
 *.pb.cc
 *.pb.h
@@ -277,7 +97,7 @@ src/qt/test/moc*.cpp
 *.qm
 Makefile
 pivx-qt
-__decenomy__-qt
+concordia-qt
 Jackpot-Qt.app
 background.tiff*
 
@@ -289,7 +109,7 @@ target/
 # Unit-tests
 Makefile.test
 pivx-qt_test
-__decenomy__-qt_test
+concordia-qt_test
 src/test/buildenv.py
 
 # Resources cpp
@@ -306,7 +126,7 @@ build
 *.gcno
 /*.info
 test_pivx.coverage/
-test___decenomy__.coverage/
+test_concordia.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -338,9 +158,9 @@ moc_*
 ui_*
 build*
 pivxd.*
-__decenomy__d.*
+concordiad.*
 pivxd-new-gui.*
-__decenomy__d-new-gui.*
+concordiad-new-gui.*
 
 # for Visual Studio Code
 
