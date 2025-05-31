@@ -2450,61 +2450,53 @@ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH*/
 
 QPushButton[cssClass="btn-settings-check"] {
   background-image: url("://ic-arrow-drop-down-white");
-  background-position: right center;
-  background-repeat: no-repeat;
-  background-color: #004000;
-  border: none;
-  border-bottom: 1px solid #bababa;
-  font-size: 20px;
+  background-position:right center;
+  background-repeat:no-repeat;
+  background-color: #211f1f;
+  border:none;
+  border-bottom:1px solid #bababa;
+  font-size:20px;
   color: #707070;
-  text-align: left;
+  text-align:left;
 }
 
 QPushButton[cssClass="btn-settings-check"]:checked {
   background-image: url("://ic-arrow-drop-up-white");
-  background-position: right center;
-  background-repeat: no-repeat;
-  background-color: #212121;
-  border: none;
-  font-size: 20px;
-  color: #bababa;
-  text-align: left;
+  background-position:right center;
+  background-repeat:no-repeat;
+  background-color:#211f1f;
+  border:none;
+  border-bottom:1px solid #211f1f;
+  font-size:20px;
+  color: #707070;
+  text-align:left;
 }
 
 QPushButton[cssClass="btn-settings-options"] {
-  background-color: #004000;
-  border: none;
-  font-size: 20px;
-  color: #bababa;
-  padding: 0 20px;
-  text-align: left;
+  background-color: rgb(48, 48, 48);
+  border:none;
+  font-size:20px;
+  color: rgba(255, 255, 255, 0.7);
+  padding:0 20px;
+  text-align:left;
 }
 
 QPushButton[cssClass="btn-settings-options"]:checked {
-  background-color: #212121;
-  border: none;
-  font-size: 20px;
-  color: #bababa;
-  padding: 0 20px;
-  text-align: left;
+  background-color:#646464;
+  border:none;
+  font-size:20px;
+  color: #eeeeee;
+  padding:0 20px;
+  text-align:left;
 }
 
 QPushButton[cssClass="btn-settings-options"]:hover {
-  background-color: #212121;
-  border: none;
-  font-size: 20px;
-  color: #bababa;
-  padding: 0 20px;
-  text-align: left;
-}
-
-QPushButton[cssClass="btn-settings-options"]:checked:hover {
-  background-color: #212121;
-  border: none;
-  font-size: 20px;
-  color: #bababa;
-  padding: 0 20px;
-  text-align: left;
+  background-color: rgba(109, 109, 109, 0.7);
+  border:none;
+  font-size:20px;
+  color: #eeeeee;
+  padding:0 20px;
+  text-align:left;
 }
 
 /*HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
