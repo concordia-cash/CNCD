@@ -1637,7 +1637,7 @@ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH*/
 }
 
 *[cssClass="img-splash-logo"] {
-  qproperty-icon: url("://img-logo-pivx-png");
+  qproperty-icon: url("://img-logo-pivx");
   qproperty-iconSize: 395px 348px;
   border: 0;
   background-color: transparent;
@@ -1652,7 +1652,7 @@ HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH*/
 }
 
 QProgressBar[cssClass="progress-splash"]::chunk:horizontal {
-  background: #4b5563;
+  background: #004000;
 }
 
 /*HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
