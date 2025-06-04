@@ -3,7 +3,7 @@ Concordia Cash
 
 Setup
 ---------------------
-[Concordia Cash](__decenomy_website_link__/) is the original Concordia client and it builds the backbone of the network. However, it downloads and stores the entire history of Concordia transactions; depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more. Thankfully you only have to do this once.
+[Concordia Cash](https://github.com/concordia-cash/CNCD/) is the original Concordia client and it builds the backbone of the network. However, it downloads and stores the entire history of Concordia transactions; depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more. Thankfully you only have to do this once.
 
 Running
 ---------------------
@@ -55,7 +55,7 @@ The Concordia repo's [root README](/README.md) contains relevant information on 
 - [Dnsseed Policy](dnsseed-policy.md)
 
 ### Resources
-* Discuss on the [Concordia Homepage](__decenomy_website_link__/).
+* Discuss on the [Concordia Homepage](https://concordia.cash/).
 * Join the [Concordia Cash Discord](https://discord.gg/W4vUeKQWaM).
 
 ### Miscellaneous
