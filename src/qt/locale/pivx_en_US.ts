@@ -3487,8 +3487,8 @@ There was an error trying to save the address list to %1. Please try again.</tra
         <translation>2) Why are my CNCD unspendable?</translation>
     </message>
     <message>
-        <source>__decenomy_website_link__/</source>
-        <translation>__decenomy_website_link__/</translation>
+        <source>https://concordia.cash/</source>
+        <translation>https://concordia.cash/</translation>
     </message>
     <message>
         <source>1</source>

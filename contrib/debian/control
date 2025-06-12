@@ -28,7 +28,7 @@ Build-Depends: debhelper,
  libzmq3-dev,
  dh-systemd
 Standards-Version: 3.9.2
-Homepage: __decenomy_website_link__
+Homepage: https://concordia.cash
 Vcs-Git: git://github.com/concordia-cash/CNCD.git
 Vcs-Browser: https://github.com/concordia-cash/CNCD
 

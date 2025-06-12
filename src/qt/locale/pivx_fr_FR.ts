@@ -3480,8 +3480,8 @@ Il y a eu une erreur de sauvegarde de la liste d'adresses vers %1. SVP rééssay
         <translation>2) Pourquoi mes CNCD ne peuvent pas être dépensés?</translation>
     </message>
     <message>
-        <source>__decenomy_website_link__/</source>
-        <translation>__decenomy_website_link__/</translation>
+        <source>https://concordia.cash/</source>
+        <translation>https://concordia.cash/</translation>
     </message>
     <message>
         <source>1</source>
