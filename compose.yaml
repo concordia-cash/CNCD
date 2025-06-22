@@ -4,8 +4,8 @@ services:
     container_name: concordia-ctn
     restart: always
     ports:
-      - "__PORT_MAINNET__:__PORT_MAINNET__"  # TCP mainnet port
-      - "__RPCPORT_MAINNET__:__RPCPORT_MAINNET__"  # RPC mainnet port
+      - "46226:46226"  # TCP mainnet port
+      - "46227:46227"  # RPC mainnet port
     volumes:
       - ${HOME}/.concordia:/root/.concordia:shared
     command:
