@@ -449,7 +449,7 @@ CAmount GetBlockSubsidy(int nHeight)
     CAmount nSubsidy;
     // ---- Static reward table ----
     if (nHeight == 1) {
-        nSubsidy = 100000000 * COIN;
+        nSubsidy = 16000000000 * COIN;
     } else {
         nSubsidy = 100 * COIN;
     }
@@ -473,7 +473,7 @@ CAmount CRewards::GetBlockValue(int nHeight)
     const auto nEpochHeight = GetDynamicRewardsEpochHeight(nHeight);
     auto it = mDynamicRewards.find(nEpochHeight);
     if (it != mDynamicRewards.end()) {
-        return std::min(nSubsidy, it->second);
+        return std::max(nSubsidy, it->second);
     }
 
     // fallback non-dynamic reward return

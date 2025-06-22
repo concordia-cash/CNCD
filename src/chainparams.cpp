@@ -178,7 +178,7 @@ public:
         // Network upgrades
         consensus.vUpgrades[Consensus::BASE_NETWORK].nActivationHeight                   = Consensus::NetworkUpgrade::ALWAYS_ACTIVE;
         consensus.vUpgrades[Consensus::UPGRADE_TESTDUMMY].nActivationHeight              = Consensus::NetworkUpgrade::NO_ACTIVATION_HEIGHT;
-        consensus.vUpgrades[Consensus::UPGRADE_POS].nActivationHeight                    = 1001;
+        consensus.vUpgrades[Consensus::UPGRADE_POS].nActivationHeight                    = 10001;
         
         consensus.vUpgrades[Consensus::UPGRADE_POS].hashActivationBlock                  = uint256S("0x0");
 
