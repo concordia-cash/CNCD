@@ -15,6 +15,7 @@
 #include "masternodeman.h"
 #include "netmessagemaker.h"
 #include "util.h"
+#include "rewards.h"
 
 
 CBudgetManager budget;
@@ -84,7 +85,7 @@ bool IsBudgetCollateralValid(const uint256& nTxCollateralHash, const uint256& nE
         - nTime is never validated via the hashing mechanism and comes from a full-validated source (the blockchain)
     */
 
-    int conf = GetIXConfirmations(nTxCollateralHash);
+    int conf = 0;
     if (!nBlockHash.IsNull()) {
         BlockMap::iterator mi = mapBlockIndex.find(nBlockHash);
         if (mi != mapBlockIndex.end() && (*mi).second) {
@@ -98,7 +99,6 @@ bool IsBudgetCollateralValid(const uint256& nTxCollateralHash, const uint256& nE
 
     nConf = conf;
 
-    //if we're syncing we won't have swiftTX information, so accept 1 confirmation
     const int nRequiredConfs = Params().GetConsensus().nBudgetFeeConfirmations;
     if (conf >= nRequiredConfs) {
         return true;
@@ -207,7 +207,7 @@ void CBudgetManager::SubmitFinalBudget()
         }
 
         // Send the tx to the network. Do NOT use SwiftTx, locking might need too much time to propagate, especially for testnet
-        const CWallet::CommitResult& res = pwalletMain->CommitTransaction(wtx, keyChange, g_connman.get(), "NO-ix");
+        const CWallet::CommitResult& res = pwalletMain->CommitTransaction(wtx, keyChange, g_connman.get());
         if (res.status != CWallet::CommitStatus::OK)
             return;
         tx = (CTransaction)wtx;
@@ -496,7 +496,7 @@ void CBudgetManager::FillBlockPayee(CMutableTransaction& txNew, bool fProofOfSta
         ++it;
     }
 
-    CAmount blockValue = GetBlockValue(chainHeight);
+    CAmount blockValue = CRewards::GetBlockValue(chainHeight);
 
     if (fProofOfStake) {
         if (nHighestCount > 0) {
@@ -568,7 +568,7 @@ CBudgetProposal* CBudgetManager::FindProposal(const uint256& nHash)
 bool CBudgetManager::IsBudgetPaymentBlock(int nBlockHeight)
 {
     int nHighestCount = -1;
-    int nFivePercent = mnodeman.CountEnabled(ActiveProtocol()) / 20;
+    int nFivePercent = mnodeman.CountEnabled() / 20;
 
     std::map<uint256, CFinalizedBudget>::iterator it = mapFinalizedBudgets.begin();
     while (it != mapFinalizedBudgets.end()) {
@@ -597,7 +597,7 @@ TrxValidationStatus CBudgetManager::IsTransactionValid(const CTransaction& txNew
 
     TrxValidationStatus transactionStatus = TrxValidationStatus::InValid;
     int nHighestCount = 0;
-    int nFivePercent = mnodeman.CountEnabled(ActiveProtocol()) / 20;
+    int nFivePercent = mnodeman.CountEnabled() / 20;
     std::vector<CFinalizedBudget*> ret;
 
     LogPrint(BCLog::MNBUDGET,"%s: checking %lli finalized budgets\n", __func__, mapFinalizedBudgets.size());
@@ -627,7 +627,7 @@ TrxValidationStatus CBudgetManager::IsTransactionValid(const CTransaction& txNew
     // check the highest finalized budgets (+/- 10% to assist in consensus)
 
     std::string strProposals = "";
-    int nCountThreshold = nHighestCount - mnodeman.CountEnabled(ActiveProtocol()) / 10;
+    int nCountThreshold = nHighestCount - mnodeman.CountEnabled() / 10;
     bool fThreshold = false;
     it = mapFinalizedBudgets.begin();
     while (it != mapFinalizedBudgets.end()) {
@@ -711,7 +711,7 @@ std::vector<CBudgetProposal*> CBudgetManager::GetBudget()
     const int nBlocksPerCycle = Params().GetConsensus().nBudgetCycleBlocks;
     int nBlockStart = nHeight - nHeight % nBlocksPerCycle + nBlocksPerCycle;
     int nBlockEnd = nBlockStart + nBlocksPerCycle - 1;
-    int mnCount = mnodeman.CountEnabled(ActiveProtocol());
+    int mnCount = mnodeman.CountEnabled();
     CAmount nTotalBudget = GetTotalBudget(nBlockStart);
 
     for (CBudgetProposal* pbudgetProposal: vBudgetPorposalsSort) {
@@ -735,7 +735,7 @@ std::vector<CBudgetProposal*> CBudgetManager::GetBudget()
         } else {
             LogPrint(BCLog::MNBUDGET,"%s:  -   Check 1 failed: valid=%d | %ld <= %ld | %ld >= %ld | Yeas=%d Nays=%d Count=%d | established=%d\n",
                     __func__, pbudgetProposal->IsValid(), pbudgetProposal->GetBlockStart(), nBlockStart, pbudgetProposal->GetBlockEnd(),
-                    nBlockEnd, pbudgetProposal->GetYeas(), pbudgetProposal->GetNays(), mnodeman.CountEnabled(ActiveProtocol()) / 10,
+                    nBlockEnd, pbudgetProposal->GetYeas(), pbudgetProposal->GetNays(), mnodeman.CountEnabled() / 10,
                     pbudgetProposal->IsEstablished());
         }
 
@@ -790,6 +790,8 @@ std::string CBudgetManager::GetRequiredPaymentsString(int nBlockHeight)
 
 CAmount CBudgetManager::GetTotalBudget(int nHeight)
 {
+    // TODO define budget values
+
     if (Params().NetworkID() == CBaseChainParams::TESTNET) {
         CAmount nSubsidy = 500 * COIN;
         return ((nSubsidy / 100) * 10) * 146;
@@ -818,8 +820,6 @@ CAmount CBudgetManager::GetTotalBudget(int nHeight)
     } else if (nHeight <= 604799 && nHeight >= 561600) {
         nSubsidy = 15 * COIN;
     } else if (nHeight <= 647999 && nHeight >= 604800) {
-        nSubsidy = 10 * COIN;
-    } else if (consensus.NetworkUpgradeActive(nHeight, Consensus::UPGRADE_ZC_V2)) {
         nSubsidy = 10 * COIN;
     } else {
         nSubsidy = 5 * COIN;
@@ -1372,7 +1372,7 @@ void CBudgetProposal::SyncVotes(CNode* pfrom, bool fPartial, int& nInvCount) con
 bool CBudgetProposal::UpdateValid(int nCurrentHeight, bool fCheckCollateral)
 {
     fValid = false;
-    if (GetNays() - GetYeas() > mnodeman.CountEnabled(ActiveProtocol()) / 10) {
+    if (GetNays() - GetYeas() > mnodeman.CountEnabled() / 10) {
         strInvalid = "Proposal " + strProposalName + ": Active removal";
         return false;
     }
@@ -1418,7 +1418,7 @@ bool CBudgetProposal::UpdateValid(int nCurrentHeight, bool fCheckCollateral)
     // nTime not being saved correctly
     // -- TODO: We should keep track of the last time the proposal was valid, if it's invalid for 2 weeks, erase it
     // if(nTime + (60*60*24*2) < GetAdjustedTime()) {
-    //     if(GetYeas()-GetNays() < (mnodeman.CountEnabled(ActiveProtocol())/10)) {
+    //     if(GetYeas()-GetNays() < (mnodeman.CountEnabled()/10)) {
     //         strError = "Not enough support";
     //         return false;
     //     }
@@ -1796,7 +1796,7 @@ void CFinalizedBudget::CheckAndVote()
         return;
     }
 
-    if (activeMasternode.vin == nullopt) {
+    if (amnodeman.Count() == 0) {
         LogPrint(BCLog::MNBUDGET,"%s: Active Masternode not initialized.\n", __func__);
         return;
     }
@@ -2149,31 +2149,36 @@ bool CFinalizedBudget::GetPayeeAndAmount(int64_t nBlockHeight, CScript& payee, C
 
 void CFinalizedBudget::SubmitVote()
 {
-    // function called only from initialized masternodes
-    assert(fMasterNode && activeMasternode.vin != nullopt);
+    // function called only from masternodes
+    assert(fMasterNode);
 
-    std::string strError = "";
-    CPubKey pubKeyMasternode;
-    CKey keyMasternode;
+    for (auto& activeMasternode : amnodeman.GetActiveMasternodes()) {
 
-    if (!CMessageSigner::GetKeysFromSecret(strMasterNodePrivKey, keyMasternode, pubKeyMasternode)) {
-        LogPrint(BCLog::MNBUDGET,"%s: Error upon calling GetKeysFromSecret\n", __func__);
-        return;
-    }
+        if(activeMasternode.vin == nullopt) continue;
 
-    CFinalizedBudgetVote vote(*(activeMasternode.vin), GetHash());
-    if (!vote.Sign(keyMasternode, pubKeyMasternode)) {
-        LogPrint(BCLog::MNBUDGET,"%s: Failure to sign.", __func__);
-        return;
-    }
+        std::string strError = "";
+        CPubKey pubKeyMasternode;
+        CKey keyMasternode;
 
-    if (budget.UpdateFinalizedBudget(vote, NULL, strError)) {
-        LogPrint(BCLog::MNBUDGET,"%s: new finalized budget vote - %s\n", __func__, vote.GetHash().ToString());
+        if (!CMessageSigner::GetKeysFromSecret(activeMasternode.strMasterNodePrivKey, keyMasternode, pubKeyMasternode)) {
+            LogPrint(BCLog::MNBUDGET, "%s: Error upon calling GetKeysFromSecret\n", __func__);
+            continue;
+        }
 
-        budget.AddSeenFinalizedBudgetVote(vote);
-        vote.Relay();
-    } else {
-        LogPrint(BCLog::MNBUDGET,"%s: Error submitting vote - %s\n", __func__, strError);
+        CFinalizedBudgetVote vote(*(activeMasternode.vin), GetHash());
+        if (!vote.Sign(keyMasternode, pubKeyMasternode)) {
+            LogPrint(BCLog::MNBUDGET, "%s: Failure to sign.", __func__);
+            continue;
+        }
+
+        if (budget.UpdateFinalizedBudget(vote, NULL, strError)) {
+            LogPrint(BCLog::MNBUDGET, "%s: new finalized budget vote - %s\n", __func__, vote.GetHash().ToString());
+
+            budget.AddSeenFinalizedBudgetVote(vote);
+            vote.Relay();
+        } else {
+            LogPrint(BCLog::MNBUDGET, "%s: Error submitting vote - %s\n", __func__, strError);
+        }
     }
 }
 

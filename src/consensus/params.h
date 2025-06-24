@@ -81,10 +81,13 @@ struct Params {
     uint256 hashGenesisBlock;
     bool fPowAllowMinDifficultyBlocks;
     uint256 powLimit;
+    int nBudgetCycleBlocks;
+    int nBudgetFeeConfirmations;
     int nCoinbaseMaturity;
     int nFutureTimeDriftPoW;
     int nFutureTimeDriftPoS;
     CAmount nMaxMoneyOut;
+    int64_t nProposalEstablishmentTime;
     int nStakeMinDepth;
     int64_t nTargetTimespan;
     int64_t nTargetSpacing;

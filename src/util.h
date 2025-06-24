@@ -51,6 +51,7 @@ extern bool fPrivacyMode;
 extern int64_t enforceMasternodePaymentsTime;
 extern int keysLoaded;
 extern bool fSucessfullyLoaded;
+extern std::string strBudgetMode;
 
 extern std::map<std::string, std::string> mapArgs;
 extern std::map<std::string, std::vector<std::string> > mapMultiArgs;
