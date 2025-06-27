@@ -13,6 +13,7 @@ debug.log           | contains debug information and general logging generated b
 fee_estimates.dat   | stores statistics used to estimate minimum transaction fees and priorities required for confirmation; since 0.10.0
 masternode.conf     | contains configuration settings for remote masternodes
 mncache.dat         | stores data for masternode list
+budget.dat          | stores data for budget objects
 mnpayments.dat      | stores data for masternode payments
 peers.dat           | peer IP address database (custom format); since 0.7.0
 wallet.dat          | personal wallet (BDB) with keys and transactions; moved to wallets/ directory on new installs since 0.16.0
