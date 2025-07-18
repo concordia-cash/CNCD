@@ -18,7 +18,7 @@
 #include "sync.h"
 #include "util.h"
 
-#include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #define MASTERNODES_DSEG_SECONDS (5 * 60)
 
@@ -73,23 +73,23 @@ private:
     // vector to hold all MNs
     std::vector<CMasternode*> vMasternodes;
     // map MNs by CScript
-    boost::unordered_map<CScript, CMasternode*, CScriptCheapHasher> mapScriptMasternodes;
+    boost::unordered_flat_map<CScript, CMasternode*, CScriptCheapHasher> mapScriptMasternodes;
     // map MNs by CTxIn
-    boost::unordered_map<CTxIn, CMasternode*, CTxInCheapHasher> mapTxInMasternodes;
+    boost::unordered_flat_map<CTxIn, CMasternode*, CTxInCheapHasher> mapTxInMasternodes;
     // map MNs by CTxIn
-    boost::unordered_map<CPubKey, CMasternode*, CPubKeyCheapHasher> mapPubKeyMasternodes;
+    boost::unordered_flat_map<CPubKey, CMasternode*, CPubKeyCheapHasher> mapPubKeyMasternodes;
     // map collaterals' UTXOs by their CScript 
-    boost::unordered_map<CScript, Coin, CScriptCheapHasher> mapScriptCollaterals;
+    boost::unordered_flat_map<CScript, Coin, CScriptCheapHasher> mapScriptCollaterals;
     // map collaterals' UTXOs by their COutPoint 
-    boost::unordered_map<COutPoint, Coin, COutPointCheapHasher> mapCOutPointCollaterals;
+    boost::unordered_flat_map<COutPoint, Coin, COutPointCheapHasher> mapCOutPointCollaterals;
     // map collaterals' UTXOs by their CAmount
-    boost::unordered_map<CAmount, boost::unordered_set<COutPoint, COutPointCheapHasher>> mapCAmountCollaterals;
+    boost::unordered_flat_map<CAmount, boost::unordered_set<COutPoint, COutPointCheapHasher>> mapCAmountCollaterals;
     // map removed collaterals' UTXOs
-    boost::unordered_map<int, boost::unordered_map<COutPoint, Coin, COutPointCheapHasher>> mapRemovedCollaterals;
+    boost::unordered_flat_map<int, boost::unordered_flat_map<COutPoint, Coin, COutPointCheapHasher>> mapRemovedCollaterals;
     // map paid payees and block indexes by CScript 
-    boost::unordered_map<CScript, std::vector<const CBlockIndex*>, CScriptCheapHasher> mapPaidPayeesBlocks;
+    boost::unordered_flat_map<CScript, std::vector<const CBlockIndex*>, CScriptCheapHasher> mapPaidPayeesBlocks;
     // map paid payees and block indexes by height 
-    boost::unordered_map<int, CScript> mapPaidPayeesHeight;
+    boost::unordered_flat_map<int, CScript> mapPaidPayeesHeight;
     // who's asked for the Masternode list and the last time
     std::map<CNetAddr, int64_t> mAskedUsForMasternodeList;
     // who we asked for the Masternode list and the last time

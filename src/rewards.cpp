@@ -20,9 +20,9 @@
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
-#include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
-boost::unordered_map<int, CAmount> mDynamicRewards;
+boost::unordered_flat_map<int, CAmount> mDynamicRewards;
 
 sqlite3* db = nullptr;
 sqlite3_stmt* insertStmt = nullptr;

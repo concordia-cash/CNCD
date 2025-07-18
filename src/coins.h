@@ -19,7 +19,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 /**
  * A UTXO entry.
@@ -124,7 +124,7 @@ struct CCoinsCacheEntry {
     explicit CCoinsCacheEntry(Coin&& coin_) : coin(std::move(coin_)), flags(0) {}
 };
 
-typedef boost::unordered_map<COutPoint, CCoinsCacheEntry, SaltedOutpointHasher> CCoinsMap;
+typedef boost::unordered_flat_map<COutPoint, CCoinsCacheEntry, SaltedOutpointHasher> CCoinsMap;
 
 /** Cursor for iterating over CoinsView state */
 class CCoinsViewCursor

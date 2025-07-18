@@ -40,7 +40,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered_set.hpp>
 
 extern CWallet* pwalletMain;
@@ -345,7 +345,7 @@ public:
     bool isMultiSendEnabled();
     void setMultiSendDisabled();
 
-    boost::unordered_map<uint256, CWalletTx, uint256CheapHasher> mapWallet;
+    boost::unordered_flat_map<uint256, CWalletTx, uint256CheapHasher> mapWallet;
     mutable boost::unordered_set<uint256, uint256CheapHasher> setWallet;
 
     std::list<CAccountingEntry> laccentries;

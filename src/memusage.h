@@ -12,7 +12,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <boost/unordered_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered_set.hpp>
 
 namespace memusage
@@ -176,7 +176,7 @@ static inline size_t DynamicUsage(const boost::unordered_set<X, Y>& s)
 }
 
 template<typename X, typename Y, typename Z>
-static inline size_t DynamicUsage(const boost::unordered_map<X, Y, Z>& m)
+static inline size_t DynamicUsage(const boost::unordered_flat_map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(unordered_node<std::pair<const X, Y> >)) * m.size() + MallocUsage(sizeof(void*) * m.bucket_count());
 }

@@ -985,7 +985,7 @@ bool CMasternodeMan::ConnectBlock(const CBlockIndex* pindex, const CBlock& block
                 const auto& coin = mapCOutPointCollaterals[outPoint];
 
                 if(mapRemovedCollaterals.find(nHeight) == mapRemovedCollaterals.end()) {
-                    mapRemovedCollaterals[nHeight] = boost::unordered_map<COutPoint, Coin, COutPointCheapHasher>();
+                    mapRemovedCollaterals[nHeight] = boost::unordered_flat_map<COutPoint, Coin, COutPointCheapHasher>();
                 }
                 mapRemovedCollaterals[nHeight][outPoint] = coin;
 
@@ -1015,7 +1015,7 @@ bool CMasternodeMan::ConnectBlock(const CBlockIndex* pindex, const CBlock& block
                 const auto& scriptPubKey = coin.out.scriptPubKey;
 
                 if(mapRemovedCollaterals.find(nHeight) == mapRemovedCollaterals.end()) {
-                    mapRemovedCollaterals[nHeight] = boost::unordered_map<COutPoint, Coin, COutPointCheapHasher>();
+                    mapRemovedCollaterals[nHeight] = boost::unordered_flat_map<COutPoint, Coin, COutPointCheapHasher>();
                 }
                 mapRemovedCollaterals[nHeight][outPoint] = coin;
 
